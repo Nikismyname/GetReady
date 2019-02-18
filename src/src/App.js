@@ -1,5 +1,16 @@
-import React, { Component } from 'react';
-import './App.css';
+import React, { Component, Fragment } from "react";
+import { Route, BrowserRouter, Switch } from "react-router-dom";
+
+import * as c from "./Utilities/Constants"
+import Login from "./Components/Login";
+import Register from "./Components/Register";
+import NavBar from "./Components/NavBar";
+import Home from "./Components/Home";
+import CreateQuestion from "./Components/CreateQuestion";
+import GlobalSheets from "./Components/GlobalSheets";
+import CreateGlobalQuestionSheet from "./Components/CreateGlobalQuestionSheet";
+import ViewGlobalQuestion from "./Components/ViewGlobalQuestion";
+import * as Fetch from "./Utilities/Fetch";
 
 class App extends Component {
   constructor(props) {
@@ -9,23 +20,29 @@ class App extends Component {
       data: ["not working yet", "nope"],
     };
   }
-
-  componentWillMount() {
-    fetch("https://localhost:44342/api/values")
-      .then(x => x.json())
-      .then(data => { 
-        console.log(data);
-        this.setState({data: data})
-      })
-      .catch(err => console.log(err))
-  }
-
+  
   render() {
-    return (
-      <div className="App">
-        {this.state.data.map(x => <div>{x}</div>)}
-      </div>
+    const App = (
+      <BrowserRouter>
+        <div className="pageContent">
+          <Route component={NavBar} />
+          <div className="container p-0">
+            <Switch>
+              <Route path={c.viewGlobalQuestion + "/:id"} component={ViewGlobalQuestion}  />
+              <Route path={c.createGlobalSheetPath + "/:id"} component={CreateGlobalQuestionSheet} />
+              <Route path={c.globalQuestionSheetsPaths + "/:id"} component={GlobalSheets} />
+              <Route path={c.createQuestionPath+"/:id"} component={CreateQuestion} />
+              <Route path={c.registerPath} component={Register} />
+              <Route path={c.loginPath} component={Login} />
+              <Route path="/" component={Home} />
+            </Switch>
+          </div>
+        </div>
+      </BrowserRouter>
+
     );
+
+    return App;
   }
 }
 
