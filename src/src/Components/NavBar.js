@@ -19,12 +19,12 @@ export default class Login extends Component {
         if (onClick !== null) {
             result =
                 <li className="nav-item">
-                    <NavLink className="nav-link" onClick={onClick} to={path}>{text}</NavLink>
+                    <NavLink className="nav-link no-text-selection" onClick={onClick} to={path}>{text}</NavLink>
                 </li>
         } else {
             result =
                 <li className="nav-item">
-                    <NavLink className="nav-link" to={path}>{text}</NavLink>
+                    <NavLink className="nav-link no-text-selection" to={path}>{text}</NavLink>
                 </li>
         }
 
@@ -61,15 +61,17 @@ export default class Login extends Component {
                         <div className="collapse navbar-collapse" id="navbarColor01">
                             <ul className="navbar-nav mr-auto">
                                 <li className="nav-item">
-                                    <NavLink className="nav-link" to="/">Home</NavLink>
+                                    <NavLink className="nav-link no-text-selection" to="/">Home</NavLink>
                                 </li>
-                                {this.renderNavItem(c.globalQuestionSheetsPaths+"/0", "Public Question", "none")}
+                                {this.renderNavItem(c.globalQuestionSheetsPaths + "/0", "Public Questions", "none")}
+                                {this.renderNavItem(c.personalQuestionSheetsPaths + "/0", "Perspnal Questions", "user")}
                             </ul>
                             <ul className="navbar-nav ml-auto">
                                 {this.renderNavItem("#", "Logout", "user", () => {
                                     localStorage.removeItem("token");
                                     localStorage.removeItem("user");
                                     this.props.history.push('/');
+                                    this.props.setUser(null);
                                 })}
                                 {this.renderNavItem(c.loginPath, "Login", "none")}
                                 {this.renderNavItem(c.registerPath, "Register", "none")}

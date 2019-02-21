@@ -6,6 +6,7 @@ import * as c from "../Utilities/Constants";
 
 import "../css/desert.css";
 const codeSeparationTag = "<<c>>";
+const emphasisSeparationTag = "<<e>>"
 
 export default class ViewGlobalQuestion extends Component {
     constructor(props) {
@@ -22,7 +23,7 @@ export default class ViewGlobalQuestion extends Component {
         this.App = this.App.bind(this);
         this.onClickShowComment = this.onClickShowComment.bind(this);
         this.onClickShowAnswer = this.onClickShowAnswer.bind(this);
-        this.renderPreWithCode = this.renderPreWithCode.bind(this);
+        this.renderPreWithCodeAndEmp = this.renderPreWithCodeAndEmp.bind(this);
     }
 
     componentWillMount() {
@@ -60,16 +61,15 @@ export default class ViewGlobalQuestion extends Component {
     }
 
     onClickShowAnswer() {
-        alert("here");
-        this.setState({showAnswer: !this.state.showAnswer});
+        this.setState({ showAnswer: !this.state.showAnswer });
     }
 
     onClickShowComment() {
-        this.setState({showComment: !this.state.showComment});
+        this.setState({ showComment: !this.state.showComment });
     }
 
     renderQuestion(q) {
-        let renderedText = this.renderPreWithCode(q.question);
+        let renderedText = this.renderPreWithCodeAndEmp (q.question);
         return (
             <Fragment>
                 <h1>Question</h1>
@@ -78,9 +78,9 @@ export default class ViewGlobalQuestion extends Component {
         )
     }
 
-    renderPreWithCode(text) {
+    renderPreWithCodeAndEmp(text) {
         let questionText = text;
-        let chunks = questionText.split("<<c>>");
+        let chunks = questionText.split(codeSeparationTag);
         let result = [];
         for (let i = 0; i < chunks.length; i++) {
             let chunk = chunks[i];
@@ -91,12 +91,48 @@ export default class ViewGlobalQuestion extends Component {
 
             if (i % 2 === 1) {
                 result.push(
-                    <pre key={i} dangerouslySetInnerHTML={{ __html: window.PR.prettyPrintOne(chunk) }} />);
+                    <pre key={i} style={{ whiteSpace: "pre-wrap" }} dangerouslySetInnerHTML={{ __html: window.PR.prettyPrintOne(chunk) }} />);
             } else {
-                result.push(<pre key={i}>{chunk}</pre>);
+                result.push(...this.renderTextWithEmp(chunk));
             }
         };
 
+        return result;
+    }
+
+    renderTextWithEmp(text) {
+        let chunks = text.split(emphasisSeparationTag);
+        let result = [];
+        for (let i = 0; i < chunks.length; i++) {
+            let chunk = chunks[i];
+            if (i % 2 === 1) {
+                if (chunk.startsWith("\n")) {
+                    chunk = chunk.slice(1);
+                }
+                result.push(
+                    <div
+                        style={{
+                            backgroundColor: c.secondaryColor,
+                            display: "inline-block"
+                    }}
+                        className="p-3"
+                    >
+                        <pre style={{
+                            whiteSpace: "pre-wrap",
+                            margin: 0,
+                        }}>
+                            {chunk}
+                        </pre>
+                    </div>
+                );
+            } else {
+                result.push(
+                    <pre style={{ whiteSpace: "pre-wrap" }}>
+                        {chunk}
+                    </pre>
+                );
+            }
+        };
         return result;
     }
 
@@ -126,7 +162,7 @@ export default class ViewGlobalQuestion extends Component {
     }
 
     renderComment(text) {
-        let renderedText = this.renderPreWithCode(text);
+        let renderedText = this.renderPreWithCodeAndEmp(text);
 
         if (this.state.showComment) {
             return (
@@ -141,7 +177,7 @@ export default class ViewGlobalQuestion extends Component {
     }
 
     renderAnswer(text) {
-        let renderedText = this.renderPreWithCode(text);
+        let renderedText = this.renderPreWithCodeAndEmp(text);
 
         if (this.state.showAnswer) {
             return (

@@ -1,11 +1,17 @@
 import * as c from "./Constants";
 
 export function GET(path) {
-    if (path.startsWith("/")) {
+    if (path.startsWith("/"))
+    {
         path = path.slice(1);
     }
 
-    return fetch(c.fetchRoot + path);
+    return fetch(c.fetchRoot + path, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+        }
+    });
 }
 
 export function POST(path, payload) {

@@ -33,7 +33,7 @@ export default class Register extends Component {
             lastName: this.state.lastName,
         };
 
-        fetch(c.fetchRoot+"User/Register", {
+        fetch(c.fetchRoot + "User/Register", {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -46,9 +46,8 @@ export default class Register extends Component {
             })
             .then((data) => {
                 if (data === true) {
-                    alert("Register worked!");
+                    this.props.history.push(c.loginPath);
                 } else {
-                    alert("Register did not work!");
                 }
             });
     }
@@ -57,17 +56,17 @@ export default class Register extends Component {
         let fields = ["username", "password", "repeatPassword", "firstName", "lastName"];
 
         return fields.map(x =>
-                <div className="form-group row" key={x}>
-                    <label className="col-sm-2 col-form-label text-right">{x}</label>
-                    <div className="col-sm-6">
-                        <input
-                            onChange={(e) => this.onChangeInput(x, e)}
-                            type={(x === "password" || x === "repeatPassword") ? "password" : "text"}
-                            value={this.state[x]}
-                            className="form-control-black"
-                            style={{ backgroundColor: c.secondaryColor }} />
-                    </div>
+            <div className="form-group row" key={x}>
+                <label className="col-sm-2 col-form-label text-right">{x}</label>
+                <div className="col-sm-6">
+                    <input
+                        onChange={(e) => this.onChangeInput(x, e)}
+                        type={(x === "password" || x === "repeatPassword") ? "password" : "text"}
+                        value={this.state[x]}
+                        className="form-control-black"
+                        style={{ backgroundColor: c.secondaryColor }} />
                 </div>
+            </div>
         );
     }
 

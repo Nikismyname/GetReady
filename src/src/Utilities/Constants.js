@@ -11,6 +11,7 @@ export const personalQuestionSheetsPaths = "/question-sheet/personal";
 export const createGlobalSheetPath = "/question-sheet/global/create";
 export const createPersonalSheetPath = "/question-sheet/personal/create";
 export const viewGlobalQuestion = "/question/global/view"
+export const copyQuestionsPath = "/question/copy"
 
 export const videoNotesBorder = "1px solid rgba(3, 91, 255, 0.6)";
 export const listToDoBorder = "1px solid rgba(253, 194, 2, 0.6)";

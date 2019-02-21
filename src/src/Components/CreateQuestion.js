@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from "react";
 import * as c from "../Utilities/Constants";
 import * as Fetch from "../Utilities/Fetch";
-import ContentEditable from "react-contenteditable";
 import Textarea from "react-expanding-textarea";
 
 export default class CreateQuestion extends Component {
@@ -14,6 +13,7 @@ export default class CreateQuestion extends Component {
             comment: "",
             name: "",
             difficulty: 0,
+            isGlobal: this.props.match.params.scope === "global" ? true : false,
         };
 
         this.onChangeInput = this.onChangeInput.bind(this);
@@ -38,13 +38,21 @@ export default class CreateQuestion extends Component {
             sheetId: this.props.match.params.id,
         };
 
-        Fetch.POST("Question/Create", data)
-            .then((response) => {
-                return response.json();
-            })
+        let scope = this.props.match.params.scope;
+        console.log(scope);
+
+        let requestPath = this.state.isGlobal ? "CreateGlobal" : "CreatePersonal";
+        console.log(requestPath);
+
+        Fetch.POST(`Question/${requestPath}`, data)
+            .then( x=> x.json() )
             .then((data) => {
                 if (data === true) {
-                    this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.id);
+                    if (this.state.isGlobal) {
+                        this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.id);
+                    } else {
+                        this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.id);
+                    }
                 } else {
                     alert("Create Question Did NOT Work!");
                 }
@@ -73,19 +81,6 @@ export default class CreateQuestion extends Component {
             )
         } else {
             return (
-                // <div className="form-group row" key={x}>
-                //     <label className="col-sm-2 col-form-label text-right">{x}</label>
-                //     <div className="col-sm-6">
-                //         <textarea
-                //             onChange={(e) => this.onChangeInput(x, e)}
-                //             className="form-control-black"
-                //             style={{ height: "100%", width: "100%", backgroundColor: c.secondaryColor }}
-                //         >
-                //             {this.state[x]}
-                //         </textarea>
-                //     </div>
-                // </div>
-
                 <div className="form-group row" key={x}>
                     <label className="col-sm-2 col-form-label text-right">{x}</label>
                     <div className="col-sm-6">
@@ -94,20 +89,9 @@ export default class CreateQuestion extends Component {
                             className="form-control-black"
                             style={{ overflow: "hidden", backgroundColor: c.secondaryColor }}
                             value={this.state[x]}
-                        />                            
+                        />
                     </div>
                 </div>
-
-                // <div className="form-group row" key={x}>
-                //     <label className="col-sm-2 col-form-label text-right">{x}</label>
-                //     <div className="col-sm-6">
-                //         <ContentEditable
-                //             onChange={(e) => this.onChangeInput(x, e)}
-                //             className="form-control-black"
-                //             style={{ height: "100%" ,width: "100%", backgroundColor: c.secondaryColor }}
-                //             html={this.state[x]} />
-                //     </div>
-                // </div>
             )
         }
     }

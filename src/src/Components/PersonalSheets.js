@@ -5,18 +5,18 @@ import { NavLink } from "react-router-dom";
 
 const borderString = "3px solid rgba(0, 0, 0, 0.6)"
 
-export default class GlobalSheets extends Component {
+export default class PesonalSheet  extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            currentSheet: {}, //id: 1, children: [], description: "", difficulty: 1, globalQuestions: []
-            //importance: 10, name: "", order: 1, questionSheetId: null/1  
+            currentSheet: {}, //id: 1, children: [], description: "", difficulty: 1, personalQuestions: []
+                              //importance: 10, name: "", order: 1, questionSheetId: null/1  
             loaded: false,
         };
 
         this.renderCurrentSheet = this.renderCurrentSheet.bind(this);
         this.renderSheetChildren = this.renderSheetChildren.bind(this);
-        this.renderGlobalQuestions = this.renderGlobalQuestions.bind(this);
+        this.renderPersonalQuestions = this.renderPersonalQuestions.bind(this);
 
         this.navigateToSheet = this.navigateToSheet.bind(this);
 
@@ -36,11 +36,17 @@ export default class GlobalSheets extends Component {
             return;
         }
 
-        Fetch.GET("QuestionSheet/GetGlobalIndex/" + id)
-            .then(x => x.json())
+        Fetch.GET("QuestionSheet/GetPersonalIndex/" + id)
+            .then(res => {
+                console.log(res);
+                return res.json()
+            })
             .then(data => {
-                window.history.pushState(null, null,"/question-sheet/global/" + id);
-                this.setState({ currentSheet: data, loaded: true });
+                window.history.pushState(null, null,"/question-sheet/personal/" + id);
+                this.setState(()=> ({
+                    currentSheet: data,
+                    loaded: true
+                }));
                 console.log(data);
             })
             .catch(err => console.log(err));
@@ -85,9 +91,8 @@ export default class GlobalSheets extends Component {
             >
                 <div data-tip="Current folder and all things you can create in it." className="card-body">
                     <div data-tip=""><h6 className="card-title">{data.name}</h6></div>
-                    <div data-tip=""><NavLink to={c.createGlobalSheetPath + "/" + this.state.currentSheet.id+"/global"}>Create Sheet</NavLink></div>
-                    <div data-tip=""><NavLink to={c.createQuestionPath + "/" + this.state.currentSheet.id + "/global"}>Create Question</NavLink></div>
-                    <div data-tip=""><NavLink to={c.copyQuestionsPath}>Copy Questions</NavLink></div>
+                    <div data-tip=""><NavLink to={c.createGlobalSheetPath + "/" + this.state.currentSheet.id+"/personal"}>Create Sheet</NavLink></div>
+                    <div data-tip=""><NavLink to={c.createQuestionPath + "/" + this.state.currentSheet.id+"/personal"}>Create Question</NavLink></div>
                 </div>
             </div>
         )
@@ -108,8 +113,8 @@ export default class GlobalSheets extends Component {
         ));
     }
 
-    renderGlobalQuestions(data) {
-        let globalQ = data.globalQuestions;
+    renderPersonalQuestions(data) {
+        let globalQ = data.personalQuestions;
         let rows = globalQ.length / 3;
         rows = Math.ceil(rows);
         let result = [];
@@ -152,7 +157,7 @@ export default class GlobalSheets extends Component {
                     {this.renderSheetChildren(this.state.currentSheet)}
                 </div>
                 <div className="col-sm-9">
-                    {this.renderGlobalQuestions(this.state.currentSheet)}
+                    {this.renderPersonalQuestions(this.state.currentSheet)}
                 </div>
             </div>
         </Fragment>)

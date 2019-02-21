@@ -1,0 +1,15 @@
+.bottom {
+    position: -webkit-sticky;
+    position: sticky;
+    bottom: 1em;
+} 
+
+.icon {
+    position: relative;
+    bottom: 3px;
+    right: 0.6em;
+  }
+
+  html {
+    overflow-y: scroll;
+  }

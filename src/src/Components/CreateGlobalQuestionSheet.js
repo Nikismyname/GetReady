@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 import * as c from "../Utilities/Constants";
 import * as Fetch from "../Utilities/Fetch";
 
-export default class Register extends Component {
+export default class CreateGlobalSheet extends Component {
     constructor(props) {
         super(props);
 
@@ -11,7 +11,7 @@ export default class Register extends Component {
             description: "",
             difficulty: "",
             importance: "",
-            //parentSheetId: "",
+            isGlobal: this.props.match.params.scope === "global" ? true : false,
         };
 
         this.onChangeInput = this.onChangeInput.bind(this);
@@ -35,12 +35,16 @@ export default class Register extends Component {
             importance: this.state.importance,
             parentSheetId: parentSheetId,
         };
-
-        Fetch.POST("QuestionSheet/CreateGlobalSheet", data)
+        let path = this.state.isGlobal ? "CreateGlobalSheet" : "CreatePersonalSheet";
+        Fetch.POST(`QuestionSheet/${path}`, data)
             .then(x => x.json())
             .then((data) => {
                 if (data === true) {
-                    this.props.history.push(c.globalQuestionSheetsPaths+"/"+this.props.match.params.id);
+                    if (this.state.isGlobal) {
+                        this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.id);
+                    } else {
+                        this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.id);
+                    }
                 } else {
                     alert("Register did not work!");
                 }
@@ -80,7 +84,7 @@ export default class Register extends Component {
     render() {
         return (
             <Fragment>
-                <h1>CREATE GLOBAL QUESTION SHEET</h1>
+                <h1>{this.state.isGlobal? "CREATE GLOBAL QUESTION SHEET": "CREATE PERSONAL QUESTION SHEET"}</h1>
                 {this.renderCreateData()}
                 {this.renderCreateButton()}
             </Fragment>

@@ -36,6 +36,8 @@ export default class Login extends Component {
                     localStorage.setItem("token", data.token);
                     delete data.token;
                     localStorage.setItem("user", JSON.stringify(data));
+                    console.log(typeof this.props.setParentState);
+                    this.props.setUser(data);
                     this.props.history.push('/');
                 } else {
                     alert("Login did not work!");
