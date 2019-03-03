@@ -1,30 +1,50 @@
 import React, { Component, Fragment } from "react";
+import * as c from "../../Utilities/Constants";
+import { parseEmpAndCode } from "../../Utilities/QuestionFunctions";
+
+// import ContentEditable from "react-contenteditable";
 import Textarea from "react-expanding-textarea";
-import * as c from "../Utilities/Constants";
-import { parseEmpAndCode } from "../Utilities/QuestionFunctions";
+import "../../css/desert.css";
 
-import "../css/desert.css";
-
-export default class ViewGlobalQuestion extends Component {
+export default class Question extends Component {
     constructor(props) {
         super(props);
-
-        console.log("INITIAL DATA:");
-        console.log(this.props.data);
-
+        console.log("Question Constructor, question: "+ JSON.stringify(this.props.question));
         this.state = {
             PRLoaded: false,
-            question: {}, //question:"", answer:"", comment: "", difficulty:1, name:"" 
+            //question:"", answer:"", comment: "", difficulty:1, name:"" 
             loaded: false,
             showComment: false,
             showAnswer: false,
-            ...this.props.data,
         };
 
         this.App = this.App.bind(this);
+
         this.onClickShowComment = this.onClickShowComment.bind(this);
         this.onClickShowAnswer = this.onClickShowAnswer.bind(this);
-        this.onClickBack = this.onClickBack.bind(this);
+        this.onClickNextQuestion = this.onClickNextQuestion.bind(this);
+    }
+
+    componentWillMount() {
+        this.runCodePrettify();
+
+        let interval = setInterval(() => {
+            if (typeof PR !== "undefined") {
+                this.setState({ PRLoaded: true })
+                clearInterval(interval);
+                console.log("PR Loaded");
+            } else {
+                console.log("PR undefined");
+            }
+        }, 20);
+    }
+
+    runCodePrettify() {
+        let script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.async = true;
+        script.src = 'https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(script);
     }
 
     onClickShowAnswer() {
@@ -35,8 +55,8 @@ export default class ViewGlobalQuestion extends Component {
         this.setState({ showComment: !this.state.showComment });
     }
 
-    onClickBack() {
-        this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.sheetId)
+    onClickNextQuestion() {
+        this.props.callBack();
     }
 
     renderAnswerInput() {
@@ -61,14 +81,14 @@ export default class ViewGlobalQuestion extends Component {
                     <button onClick={this.onClickShowAnswer} className="btn btn-primary btn-block">Show Answer</button>
                 </div>
                 <div className="col-2">
-                    <button onClick={this.onClickBack} className="btn btn-primary btn-block">Back</button>
+                    <button onClick={this.onClickNextQuestion} className="btn btn-primary btn-block">Next Question</button>
                 </div>
             </div>
         )
     }
 
-    renderQuestion(q) {
-        let renderedText = parseEmpAndCode(q.question);
+    renderQuestion(text) {
+        let renderedText = parseEmpAndCode(text);
         return (
             <Fragment>
                 <h1>Question</h1>
@@ -110,16 +130,20 @@ export default class ViewGlobalQuestion extends Component {
     App() {
         return (
             <Fragment>
-                {this.renderQuestion(this.state.question)}
+                {this.renderQuestion(this.props.question.question)}
                 {this.renderAnswerInput()}
-                {this.renderComment(this.state.question.comment)}
-                {this.renderAnswer(this.state.question.answer)}
+                {this.renderComment(this.props.question.comment)}
+                {this.renderAnswer(this.props.question.answer)}
                 {this.renderControls()}
             </Fragment>
         );
     }
 
     render() {
-        return this.App();
+        if (this.state.PRLoaded) {
+            return this.App();
+        } else {
+            return <h1>LOADING</h1>
+        }
     }
 }

@@ -218,7 +218,7 @@ export default class GlobalQuestionPicker extends Component {
     App() {
         return (
             <Fragment>
-                <h3 className="no-text-selection">Select one of your folders.</h3>
+                <h3 className="no-text-selection">Select Questions to copy.</h3>
                 {this.renderSheets(this.state.sheets)}
                 {this.renderSelectButton()}
             </Fragment>

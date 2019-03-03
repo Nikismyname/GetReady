@@ -2,10 +2,13 @@ import React, { Component, Fragment } from "react";
 import * as c from "../Utilities/Constants";
 import * as Fetch from "../Utilities/Fetch";
 import { NavLink } from "react-router-dom";
+import QuestionService from "../Services/QuestionService";
 
 const borderString = "3px solid rgba(0, 0, 0, 0.6)"
 
 export default class GlobalSheets extends Component {
+    static questionService = new QuestionService();
+
     constructor(props) {
         super(props);
         this.state = {
@@ -39,33 +42,30 @@ export default class GlobalSheets extends Component {
         Fetch.GET("QuestionSheet/GetGlobalIndex/" + id)
             .then(x => x.json())
             .then(data => {
-                window.history.pushState(null, null,"/question-sheet/global/" + id);
+                window.history.pushState(null, null, "/question-sheet/global/" + id);
                 this.setState({ currentSheet: data, loaded: true });
                 console.log(data);
             })
             .catch(err => console.log(err));
     }
 
-    onClickDeleteQuestion(e, id) {
+    async onClickDeleteQuestion(e, id) {
         e.preventDefault();
         e.stopPropagation();
 
-        Fetch.POST("Question/Delete", id)
-            .then(x => x.json())
-            .then(res => {
-                if (res) {
-                    let newState = this.state;
-                    newState.currentSheet.globalQuestions = newState.currentSheet.globalQuestions.filter(x => x.id !== id);
-                    this.setState(newState);
-                } else {
-                    alert("Did not work!");
-                }
-            })
-            .catch(err => console.log(err));
+        let deleteResult = await this.questionService.deleteGlobal(id);
+        if (deleteResult.status === 200) {
+            let newState = this.state;
+            newState.currentSheet.globalQuestions = newState.currentSheet.globalQuestions
+                .filter(x => x.id !== id);
+            this.setState(newState);
+        } else {
+            alert(deleteResult.message);
+        }
     }
 
     onClickGlobalQuestion(ind) {
-        this.props.history.push(c.viewGlobalQuestion + "/" + ind);
+        this.props.history.push(c.viewGlobalQuestion + "/" + ind + "/" + this.state.currentSheet.id);
     }
 
     onClickDeleteChild(e, id) {
@@ -85,7 +85,7 @@ export default class GlobalSheets extends Component {
             >
                 <div data-tip="Current folder and all things you can create in it." className="card-body">
                     <div data-tip=""><h6 className="card-title">{data.name}</h6></div>
-                    <div data-tip=""><NavLink to={c.createGlobalSheetPath + "/" + this.state.currentSheet.id+"/global"}>Create Sheet</NavLink></div>
+                    <div data-tip=""><NavLink to={c.createGlobalSheetPath + "/" + this.state.currentSheet.id + "/global"}>Create Sheet</NavLink></div>
                     <div data-tip=""><NavLink to={c.createQuestionPath + "/" + this.state.currentSheet.id + "/global"}>Create Question</NavLink></div>
                     <div data-tip=""><NavLink to={c.copyQuestionsPath}>Copy Questions</NavLink></div>
                 </div>
@@ -132,6 +132,7 @@ export default class GlobalSheets extends Component {
                                     <h6 className="card-title">{x.name}</h6>
                                     <p className="card-text">{x.description}</p>
                                     <a className="ml-1" href="#" onClick={(e) => this.onClickDeleteQuestion(e, x.id)} >Delete</a>
+                                    <NavLink to={c.editQuestionPath + "/" + x.id + "/global/" + this.state.currentSheet.id} className="ml-1" href="#" onClick={this.onClickStopPropagation}>Edit</NavLink>
                                 </div>
                             </div>
                         </div>
@@ -156,6 +157,10 @@ export default class GlobalSheets extends Component {
                 </div>
             </div>
         </Fragment>)
+    }
+
+    onClickStopPropagation(e) {
+        e.stopPropagation();
     }
 
     render() {

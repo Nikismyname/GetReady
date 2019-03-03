@@ -11,6 +11,7 @@ export default class SelectQuestions extends Component {
             selectedDir: 0,
             selectedQuestions: [],
             selectingQuestions: true,
+            creatingDir: false,
         };
 
         this.selectedDirectory = this.selectedDirectory.bind(this);
@@ -18,25 +19,29 @@ export default class SelectQuestions extends Component {
     }
 
     selectedDirectory(id) {
-        console.log("SelectedId: "+id);
+        console.log("SelectedId: " + id);
         this.setState(() => ({ selectedDir: id }));
         let data = {
             selectedDir: id,
             selectedQuestions: this.state.selectedQuestions,
         }
-
-        // Fetch.POST("Questions/TrasferFromPublic", data)
-        //     .then(x => x.json)
-        //     .then(res => { 
-        //         if (res === true) {
-        //             this.props.history.push(c.personalQuestionSheetsPaths+"/"+id)
-        //         }
-        //     });
+        console.log(data);
+        Fetch.POST("Question/CopyQuestions", data)
+            .then(x => x.json())
+            .then(res => {
+                console.log(res);
+                if (res === true) {
+                    this.props.history.push(c.personalQuestionSheetsPaths + "/" + id)
+                } else {
+                    alert("Copy Questions did not work!");
+                }
+            })
+            .catch(err=> console.log(err));
     }
 
     selectedQuestions(intArray) {
-        console.log("Array Here");
-        console.log(intArray);
+        // console.log("Array Here");
+        // console.log(intArray);
         this.setState(() => ({
             selectedQuestions: intArray,
             selectingQuestions: false,
@@ -46,11 +51,11 @@ export default class SelectQuestions extends Component {
     render() {
         if (this.state.selectingQuestions) {
             return (
-                <QuestionPicker callBack={this.selectedQuestions}/>
+                <QuestionPicker callBack={this.selectedQuestions} />
             )
         } else {
             return (
-                <PersonalDirSelector callBack={this.selectedDirectory}/>
+                <PersonalDirSelector callBack={this.selectedDirectory} />
             )
         }
     }

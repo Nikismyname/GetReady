@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import * as Fetch from "../../Utilities/Fetch";
-// import * as c from "../../Utilities/Constants";
 import "../../css/personal-dir-selector.css";
+import CreateDir from "../CreateQuestionSheet";
 
 export default class PersonalDirSelector extends Component {
     constructor(props) {
@@ -9,21 +9,27 @@ export default class PersonalDirSelector extends Component {
 
         this.state = {
             sheets: [], /// id:1, name:"", questionSheetId: null/1 
-            /// isSelected: false,
+                        /// isSelected: false,
+            parentSheetId: 0,
             selectedId: 0,
             loaded: false,
             collapsedIds: [],
             textSelection: true,
+            creatingDir: false,
         };
 
         this.App = this.App.bind(this);
 
         this.renderSheets = this.renderSheets.bind(this);
         this.renderSingleSheet = this.renderSingleSheet.bind(this);
+        this.renderControls = this.renderControls.bind(this);
 
         this.onClickSheet = this.onClickSheet.bind(this);
         this.onClickExpand = this.onClickExpand.bind(this);
         this.onClickSelect = this.onClickSelect.bind(this);
+        this.onCLickCreateDir = this.onCLickCreateDir.bind(this);
+
+        this.onCallbackDirCreated = this.onCallbackDirCreated.bind(this);
     }
 
     componentDidMount() {
@@ -107,6 +113,29 @@ export default class PersonalDirSelector extends Component {
         this.props.callBack(selectedId);
     }
 
+    onCLickCreateDir() {
+        if (this.state.selectedId !== 0) {
+            this.setState(() => ({
+                creatingDir: true,
+                parentSheetId: this.state.selectedId,
+            }));
+        }
+    }
+
+    onCallbackDirCreated(id, name) {
+        let newSheet = {
+            id: id,
+            name: name,
+            questionSheetId: this.state.parentSheetId,
+            isSelected: false,
+        }
+
+        this.setState((p) => ({
+            creatingDir: false,
+            sheets: [...p.sheets, newSheet],
+        }));
+    }
+
     renderSheets(sheets) {
         let root = sheets.filter(x => x.questionSheetId === null)[0];
         return this.renderSingleSheet(root);
@@ -157,30 +186,46 @@ export default class PersonalDirSelector extends Component {
         return children.map(x => this.renderSingleSheet(x));
     }
 
-    renderSelectButton() {
+    renderControls() {
         return (
-            <button
-                onClick={this.onClickSelect}
-                className="btn btn-success no-text-selection bottom mt-4"
-            >
-                Select Sheet
-            </button>
+            <Fragment>
+                <button
+                    onClick={this.onClickSelect}
+                    className="btn btn-success no-text-selection bottom mt-4"
+                >
+                    Select Sheet
+                </button>
+                <button
+                    onClick={this.onCLickCreateDir}
+                    className="btn btn-success no-text-selection bottom mt-4"
+                >
+                    Create Sheet
+                </button>
+            </Fragment>
         );
     }
 
     App() {
         return (
             <Fragment>
-                <h3 className="no-text-selection">Select one of your folders.</h3>
+                <h3 className="no-text-selection">Select the folder the questions are going in.</h3>
                 {this.renderSheets(this.state.sheets)}
-                {this.renderSelectButton()}
+                {this.renderControls()}
             </Fragment>
         )
     }
 
     render() {
         if (this.state.loaded) {
-            return this.App();
+            if (this.state.creatingDir) {
+                return <CreateDir
+                    match={{ params: { scope: "personal", id: this.state.selectedId } }}
+                    isInternal={true}
+                    callBack={this.onCallbackDirCreated}
+                />
+            } else {
+                return this.App();
+            }
         } else {
             return <h1>Loading</h1>
         }

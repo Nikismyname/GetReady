@@ -1,5 +1,8 @@
 import React, { Component, Fragment } from "react";
+import UserService from "../Services/UserService";
 import * as c from "../Utilities/Constants";
+
+let userService = new UserService();
 
 export default class Register extends Component {
     constructor(props) {
@@ -24,7 +27,7 @@ export default class Register extends Component {
         this.setState(newState);
     }
 
-    onClickRegister() {
+    async onClickRegister() {
         let data = {
             username: this.state.username,
             password: this.state.password,
@@ -33,23 +36,13 @@ export default class Register extends Component {
             lastName: this.state.lastName,
         };
 
-        fetch(c.fetchRoot + "User/Register", {
-            method: "POST",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-            .then((response) => {
-                return response.json();
-            })
-            .then((data) => {
-                if (data === true) {
-                    this.props.history.push(c.loginPath);
-                } else {
-                }
-            });
+        let registerResult = await userService.register(data);
+
+        if (registerResult.status === 200) {
+            this.props.history.push(c.loginPath);
+        } else {
+            alert(registerResult.message);
+        }
     }
 
     renderRegisterData() {

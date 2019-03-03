@@ -13,3 +13,9 @@
   html {
     overflow-y: scroll;
   }
+
+  html *
+{
+   color: rgb(226, 223, 223);
+   font-family: Arial !important;
+}

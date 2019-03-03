@@ -4,7 +4,7 @@ import * as Fetch from "../Utilities/Fetch";
 import Textarea from "react-expanding-textarea";
 import QuestionService from "../Services/QuestionService";
 
-export default class CreateQuestion extends Component {
+export default class EditQuestion extends Component {
     static questionService = new QuestionService();
 
     constructor(props) {
@@ -17,12 +17,35 @@ export default class CreateQuestion extends Component {
             name: "",
             difficulty: 0,
             isGlobal: this.props.match.params.scope === "global" ? true : false,
+            loaded: false,
         };
 
         this.onChangeInput = this.onChangeInput.bind(this);
         this.renderComparisonData = this.renderQuestionCreationData.bind(this);
+        this.onClickRegister = this.onClickCreate.bind(this);
         this.onClickCreate = this.onClickCreate.bind(this);
         this.onClickBack = this.onClickBack.bind(this);
+    }
+
+    componentDidMount() {
+        let id = this.props.match.params.id;
+        let scope = this.props.match.params.scope;
+
+        let getResult = this.questionService.get(id, scope);
+
+        if (getResult.status === 200) {
+            let q = getResult.data;
+            this.setState(() => ({
+                loaded: true,
+                question: q.question,
+                answer: q.answer,
+                comment: q.comment,
+                name: q.name,
+                difficulty: q.difficulty,
+            }));
+        } else {
+            alert(getResult.message);
+        }
     }
 
     onChangeInput(target, event) {
@@ -31,39 +54,44 @@ export default class CreateQuestion extends Component {
         this.setState(newState);
     }
 
-    async onClickCreate() {
+    onClickCreate() {
+        let id = this.props.match.params.id;
+
         let data = {
             question: this.state.question,
             answer: this.state.answer,
             comment: this.state.comment,
             name: this.state.name,
             difficulty: this.state.difficulty,
-            sheetId: this.props.match.params.id,
+            id: id,
         };
 
         let scope = this.props.match.params.scope;
         console.log(scope);
 
-        let requestPath = this.state.isGlobal ? "CreateGlobal" : "CreatePersonal";
+        let requestPath = this.state.isGlobal ? "EditGlobal" : "EditPersonal";
         console.log(requestPath);
 
-        let createResult = await this.questionService.createQuestion(data, this.state.isGlobal);
-        if (createResult.status === 200) {
-            if (this.state.isGlobal) {
-                this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.id);
-            } else {
-                this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.id);
-            }
-        } else {
-            alert(createResult.message);
-        }
+        Fetch.POST(`Question/${requestPath}`, data)
+            .then(x => x.json())
+            .then((data) => {
+                if (data !== 0) {
+                    if (this.state.isGlobal) {
+                        this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.sheetId);
+                    } else {
+                        this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.sheetId);
+                    }
+                } else {
+                    alert("Create Question Did NOT Work!");
+                }
+            }).catch(err => console.log(err));
     }
 
     onClickBack() {
         if (this.state.isGlobal) {
-            this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.id);
+            this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.sheetId);
         } else {
-            this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.id);
+            this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.sheetId);
         }
     }
 
@@ -109,27 +137,31 @@ export default class CreateQuestion extends Component {
             <div className="row">
                 <div className="offset-2 col-sm-2">
                     <button
-                        className="btn btn-primary btn-block"
-                        onClick={this.onClickCreate}> Create</button>
+                        className="btn btn-primary btn-block btn-warning"
+                        onClick={this.onClickCreate}> Edit
+                        </button>
                 </div>
-                <div className="col-sm-2 btn-block">
+                <div className="col-sm-2">
                     <button
                         className="btn btn-primary btn-block"
-                        onClick={this.onClickBack}>
-                        Back
-                    </button>
+                        onClick={this.onClickBack}> Back
+                        </button>
                 </div>
             </div>
         );
     }
 
     render() {
-        return (
-            <Fragment>
-                <h1>Create Question</h1>
-                {this.renderQuestionCreationData()}
-                {this.renderCreateButton()}
-            </Fragment>
-        );
+        if (this.state.loaded == true) {
+            return (
+                <Fragment>
+                    <h1>Edit Question</h1>
+                    {this.renderQuestionCreationData()}
+                    {this.renderCreateButton()}
+                </Fragment>
+            );
+        } else {
+            return <h1>Loading...</h1>
+        }
     }
 }

@@ -2,9 +2,16 @@ import React, { Component, Fragment } from "react";
 import * as c from "../Utilities/Constants";
 import * as Fetch from "../Utilities/Fetch";
 
-export default class CreateGlobalSheet extends Component {
+export default class CreateSheet extends Component {
     constructor(props) {
         super(props);
+
+        console.log("DUMP HERE");
+        let isGlobal = this.props.match.params.scope === "global" ? "true" : "false";
+        console.log("IsGlobal: " + isGlobal);
+        console.log("Id: " + this.props.match.params.id);
+        console.log("IsInternal: " + this.props.isInternal);
+        console.log("///.................");
 
         this.state = {
             name: "",
@@ -17,6 +24,7 @@ export default class CreateGlobalSheet extends Component {
         this.onChangeInput = this.onChangeInput.bind(this);
         this.renderCreateData = this.renderCreateData.bind(this);
         this.onClickCreateSheet = this.onClickCreateSheet.bind(this);
+        this.onClickBack = this.onClickBack.bind(this);
     }
 
     onChangeInput(target, event) {
@@ -38,18 +46,33 @@ export default class CreateGlobalSheet extends Component {
         let path = this.state.isGlobal ? "CreateGlobalSheet" : "CreatePersonalSheet";
         Fetch.POST(`QuestionSheet/${path}`, data)
             .then(x => x.json())
-            .then((data) => {
-                if (data === true) {
+            .then((res) => {
+                if (res !== 0) {
+                    console.log("RES HERE");
+                    console.log(res);
+
                     if (this.state.isGlobal) {
                         this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.id);
                     } else {
-                        this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.id);
+                        if (this.props.isInternal) {
+                            this.props.callBack(res, data.name);
+                        } else {
+                            this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.id);
+                        }
                     }
                 } else {
                     alert("Register did not work!");
                 }
             })
             .catch(err => console.log(err));
+    }
+
+    onClickBack() {
+        if (this.state.isGlobal) {
+            this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.id);
+        } else {
+            this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.id);
+        }
     }
 
     renderCreateData() {
@@ -72,10 +95,19 @@ export default class CreateGlobalSheet extends Component {
     renderCreateButton() {
         return (
             <div className="row">
-                <div className="offset-2 col-sm-6">
+                <div className="offset-2 col-sm-2">
                     <button
-                        className="btn btn-primary"
-                        onClick={this.onClickCreateSheet}>Create</button>
+                        className="btn btn-primary btn-block"
+                        onClick={this.onClickCreateSheet}>
+                        Create
+                    </button>
+                </div>
+                <div className="col-sm-2">
+                    <button
+                        className="btn btn-primary btn-block"
+                        onClick={this.onClickBack}>
+                        Back
+                    </button>
                 </div>
             </div>
         );
@@ -84,7 +116,7 @@ export default class CreateGlobalSheet extends Component {
     render() {
         return (
             <Fragment>
-                <h1>{this.state.isGlobal? "CREATE GLOBAL QUESTION SHEET": "CREATE PERSONAL QUESTION SHEET"}</h1>
+                <h1>{this.state.isGlobal ? "CREATE GLOBAL QUESTION SHEET" : "CREATE PERSONAL QUESTION SHEET"}</h1>
                 {this.renderCreateData()}
                 {this.renderCreateButton()}
             </Fragment>

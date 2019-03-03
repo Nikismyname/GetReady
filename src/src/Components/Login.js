@@ -1,6 +1,9 @@
 import React, { Component, Fragment } from "react";
 import * as c from "../Utilities/Constants";
 import * as Fetch from "../Utilities/Fetch";
+import UserService from "../Services/UserService";
+
+const userService = new UserService();
 
 export default class Login extends Component {
     constructor(props) {
@@ -22,28 +25,26 @@ export default class Login extends Component {
         this.setState(newState);
     }
 
-    onClickLogin() {
+    async onClickLogin() {
         let data = {
             username: this.state.username,
             password: this.state.password,
         };
 
-        Fetch.POST("User/LogIn", data)
-            .then(x=>x.json())
-            .then((data) => {
-                if (data !== null) {
-                    console.log(data);
-                    localStorage.setItem("token", data.token);
-                    delete data.token;
-                    localStorage.setItem("user", JSON.stringify(data));
-                    console.log(typeof this.props.setParentState);
-                    this.props.setUser(data);
-                    this.props.history.push('/');
-                } else {
-                    alert("Login did not work!");
-                }
-            });
-    }
+
+        let loginResult = await userService.login(data);
+
+        if (loginResult.status === 200) {
+            let loginData = loginResult.data;
+            console.log(loginData);
+            localStorage.setItem("token", loginData.token);
+            localStorage.setItem("user", JSON.stringify(loginData));
+            this.props.setUser(loginData);
+            this.props.history.push('/');
+        } else {
+            alert(loginResult.message);
+        }
+    };
 
     renderLoginData() {
         let fields = ["username", "password"];
