@@ -47,7 +47,8 @@ export default class CreateQuestion extends Component {
         let requestPath = this.state.isGlobal ? "CreateGlobal" : "CreatePersonal";
         console.log(requestPath);
 
-        let createResult = await this.questionService.createQuestion(data, this.state.isGlobal);
+        let createResult = await CreateQuestion.questionService.createQuestion(data, this.state.isGlobal);
+
         if (createResult.status === 200) {
             if (this.state.isGlobal) {
                 this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.id);
@@ -70,15 +71,24 @@ export default class CreateQuestion extends Component {
     renderQuestionCreationData() {
         let fields = ["name", "question", "answer", "comment", "difficulty"];
 
-        return fields.map(x => this.renderField(x));
+        return (
+            <div className="row">
+                <div className="col-sm-8">
+                    {fields.map(x => this.renderField(x))}
+                </div>
+                <div className="col-sm-4">
+                    {c.formattingMap.map(x=>(<p>{x}</p>))}
+                </div>
+            </div>
+        )
     }
 
     renderField(x) {
         if (x === "name" || x === "difficulty") {
             return (
                 <div className="form-group row" key={x}>
-                    <label className="col-sm-2 col-form-label text-right">{x}</label>
-                    <div className="col-sm-6">
+                    <label className="col-sm-3 col-form-label text-right">{x}</label>
+                    <div className="col-sm-9">
                         <input
                             onChange={(e) => this.onChangeInput(x, e)}
                             value={this.state[x]}
@@ -90,8 +100,8 @@ export default class CreateQuestion extends Component {
         } else {
             return (
                 <div className="form-group row" key={x}>
-                    <label className="col-sm-2 col-form-label text-right">{x}</label>
-                    <div className="col-sm-6">
+                    <label className="col-sm-3 col-form-label text-right">{x}</label>
+                    <div className="col-sm-9">
                         <Textarea
                             onChange={(e) => this.onChangeInput(x, e)}
                             className="form-control-black"

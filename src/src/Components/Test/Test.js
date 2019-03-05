@@ -1,8 +1,12 @@
-import React, { Fragment, Component } from "react";
+import React, { Component } from "react";
 import Question from "./Question";
-import * as Fetch from "../../Utilities/Fetch";
+import QuestionService from "../../Services/QuestionService";
+import QuestionSheetService from "../../Services/QuestionSheetService";
 
 export default class Test extends Component {
+    static questionService = new QuestionService();
+    static questionSheetService = new QuestionSheetService();
+
     constructor(props) {
         super(props);
 
@@ -19,35 +23,26 @@ export default class Test extends Component {
         this.App = this.App.bind(this);
     }
 
-    componentDidMount() {
-        Fetch.GET("QuestionSheet/GetQuestionIdsForSheet/" + this.props.match.params.id)
-            .then(x => x.json())
-            .then(res => {
-                console.log("QuestionIds");
-                console.log(res);
-                this.setState({
-                    questionIds: res,
-                });
-                this.fetchQuestion(this.state.questionIds[0]);
-            })
+    async componentDidMount() {
+        let getIdsResult = await Test.questionSheetService.getIdsForSheet(this.props.match.params.id);
+        if (getIdsResult.status === 200) {
+            this.setState({
+                questionIds: getIdsResult.data,
+            });
+            this.fetchQuestion(this.state.questionIds[0]);
+        }
     }
 
-    fetchQuestion(id) {
-        console.log("FETCHED QUESTION: "+id);
-        Fetch.POST("Question/GetPersonal", id)
-            .then(res => res.json())
-            .then((res) => {
-                console.log(res);
-                if (res != null) {
-                    this.setState({
-                        question: res,
-                        loaded: true,
-                    });
-                } else {
-                    alert("Fetch question did not work!");
-                }
-            })
-            .catch(err => alert(err));
+    async fetchQuestion(id) {
+        let getResult = await Test.questionService.get(id, "personal");
+        if (getResult.status === 200) {
+            this.setState({
+                question: getResult.data,
+                loaded: true,
+            });
+        } else {
+            alert(getResult.message);
+        }
     }
 
     onCallBackQuestionAnswered() {

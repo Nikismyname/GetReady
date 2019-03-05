@@ -4,11 +4,15 @@ export default class QuestionServieces {
     async getGlobalInit(id) {
         try {
             let result = await post("Question/GetGlobal", id);
-            return {
-                question: result,
+            if (result.status === 200) {
+                return {
+                    question: result.data,
+                }
+            } else {
+                alert("Fetching initial data failed, message: "+ result.message );
             }
         } catch (err) {
-            console.log(err);
+            this.handleError(err);
         }
     }
 
@@ -18,16 +22,16 @@ export default class QuestionServieces {
             let result = await post(path, id);
             return result;
         } catch (err) {
-            console.log(err);
+            this.handleError(err);
         }
     }
 
     async deletePersonal(id) {
         try { 
-            let result = await post("Question/DeletePersonal", id);
+            let result = await post("Question/DeletePersonal", id, true);
             return result;
         } catch (err) {
-            console.log(err);
+            this.handleError(err);
         }
     }
 
@@ -36,7 +40,7 @@ export default class QuestionServieces {
             let result = await post("Question/DeleteGlobal", id);
             return result;
         } catch (err) {
-            console.log(err);
+            this.handleError(err);
         }
     }
  
@@ -45,7 +49,7 @@ export default class QuestionServieces {
             let result = await post("Question/Reorder", data);
             return result;
         } catch(err){
-            console.log(err);
+            this.handleError(err);
         }
     }
     
@@ -55,7 +59,32 @@ export default class QuestionServieces {
             let result = await post(path, data);
             return result;
         } catch (err) {
-            console.log(err);
+            this.handleError(err);
         }
     }
+
+    async edit(data, scope) {
+        try { 
+            let path = scope === "global" ? "Question/EditGlobal" : "Question/EditPersonal";
+            let result = await post(path, data);
+            return result;
+        }
+        catch (err) {
+            this.handleError(err);
+        }
+    }
+
+    async copyQuestions(data) {
+        try {
+            let result = await post("Question/CopyQuestions", data);
+            return result;
+        } catch (err) {
+            this.handleError(err);
+        }
+    }
+
+    handleError(err) {
+        console.log(err);
+    }
 }
+

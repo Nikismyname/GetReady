@@ -1,92 +1,122 @@
 import React from "react";
-import { secondaryColor } from "./Constants"
+import {
+    blockMappings,
+    transperantBlockMappings,
+    inlineMappings,
+    replaceTags,
+    trimEnds,
+    makePre,
+} from "./FormattingHelpers";
 
-const codeSeparationTag = "<<c>>";
-const emphasisSeparationTag = "<<e>>"
-const inlineCodeTag = "<<s>>";
-const inlineEmpTag = "<<em>>";
-const paragraphTag = "<<p>>";
-
-const fontSize = 25;
-const empBackgroundColor = secondaryColor;
-
-export function parseEmpAndCode(text) {
-    let chunks = text.split(codeSeparationTag);
-    let result = [];
-    for (let i = 0; i < chunks.length; i++) {
-        let chunk = chunks[i];
-        ///Code Here
-        if (i % 2 === 1) {
-            chunk = replaceTags(chunk);
-            result.push(
-                <pre
-                    key={i}
-                    style={{ fontSize, }}
-                    dangerouslySetInnerHTML={{ __html: window.PR.prettyPrintOne(chunk) }} />);
-        }
-        ///Rest Here
-        else {
-            result.push(...parseEmp(chunk));
-        }
-    };
-
-    return result;
+export function formatText(text) {
+    return ParseTransperantBlockElements(text, transperantBlockMappings);
 }
 
-function parseEmp(text) {
-    let chunks = text.split(emphasisSeparationTag);
-    let result = [];
-    for (let i = 0; i < chunks.length; i++) {
-        let chunk = chunks[i];
-        if (i % 2 === 1) {
-            chunk = trimEnds(chunk);
-            result.push(
-                <div
-                    style={{
-                        backgroundColor: empBackgroundColor,
-                        display: "inline-block"
-                    }}
-                    className="p-3"
-                >
-                    <pre style={{
-                        whiteSpace: "pre-wrap",
-                        margin: 0,
-                        fontSize,
-                    }}>
-                        {chunk}
-                    </pre>
-                </div>
-            );
-        } else {
-            result.push(parseParagraphs(chunk));
+function ParseTransperantBlockElements(text, mappings) {
+    let tags = Object.keys(mappings);
+    let result = [
+        [text, false /*is in final state!*/]
+    ];
+
+    for (let j = 0; j < tags.length; j++) {
+        let tag = tags[j];
+        let newResult = [];
+        for (let k = 0; k < result.length; k++) {
+            if (result[k][1] === true) {
+                newResult.push(result[k]);
+                continue;
+            };
+            if (result[k][0].length === 0 || result[k][0]==="\n") {
+                // if (toEqual === 1) {
+                //     toEqual = 0;
+                // } else {
+                //     toEqual = 1;
+                // }
+                continue;
+            };
+
+            let currText = result[k][0];
+            let chunks = currText.split(tag);
+            let toEqual = 1;
+            for (let i = 0; i < chunks.length; i++) {
+                let chunk = chunks[i];
+                if (i % 2 === toEqual) {
+                    chunk = trimEnds(chunk);
+                    let formattedChunk = mappings[tag](ParseBlockElements(chunk, blockMappings));
+                    chunk = [formattedChunk, true];
+                    newResult.push(chunk);
+                } else {
+                    chunk = [chunk, false];
+                    newResult.push(chunk);
+                }
+            };
+        };
+        result = newResult;
+    };
+
+    console.log("NUMBER OF TRANS BLOCK ELEMENTS: " + result.length);
+
+    for (let i = 0; i < result.length; i++) {
+        if (result[i][1] === false) {
+            result[i][0] = ParseBlockElements(result[i][0], blockMappings);
         }
     };
-    return result;
+
+    return result.map(x=>x[0]);
 }
 
-function parseParagraphs(text) {
-    let chunks = text.split(paragraphTag);
-    let result = [];
-    let toEqual = 1;
-    for (let i = 0; i < chunks.length; i++) {
-        let chunk = chunks[i];
-        if (chunk === "\n\r" || chunk.length === 0) {
-            if (toEqual === 1) {
-                toEqual = 0;
-            } else {
-                toEqual = 1;
-            }
-            continue;
-        }
-        if (i % 2 === toEqual) {
-            chunk = trimEnds(chunk)
-            result.push(<p>{parseInlineElements(chunk, inlineMappings)}</p>);
-        } else {
-            result.push(...parseInlineElements(chunk, inlineMappings));
+function ParseBlockElements(text, mappings) {
+    let tags = Object.keys(mappings);
+    let result = [
+        [text, false /*is in final state!*/]
+    ];
+
+    for (let j = 0; j < tags.length; j++) {
+        let tag = tags[j];
+        let newResult = [];
+        for (let k = 0; k < result.length; k++) {
+            if (result[k][1] === true) {
+                newResult.push(result[k]);
+                continue;
+            };
+            if (result[k][0].length === 0 || result[k][0]==="\n") {
+                // if (toEqual === 1) {
+                //     toEqual = 0;
+                // } else {
+                //     toEqual = 1;
+                // }
+                continue;
+            };
+            let currText = result[k][0];
+            let chunks = currText.split(tag);
+
+            let toEqual = 1;
+            for (let i = 0; i < chunks.length; i++) {
+                let chunk = chunks[i];
+                if (i % 2 === toEqual) {
+                    chunk = trimEnds(chunk);
+                    let formattedChunk = mappings[tag](chunk);
+                    chunk = [formattedChunk, true];
+                    newResult.push(chunk);
+                } else {
+                    chunk = [chunk, false];
+                    newResult.push(chunk);
+                }
+            };
+        };
+        result = newResult;
+    };
+
+    console.log("NUMBER OF BLOCK ELEMENTS: " + result.length);
+
+    for (let i = 0; i < result.length; i++) {
+        if (result[i][1] === false) {
+            result[i][0] = makePre(parseInlineElements(result[i][0], inlineMappings));
+            result[i][1] = true;
         }
     };
 
-    return <pre style={{ whiteSpace: "pre-wrap", fontSize }}>{result}</pre>;
+    return result.map(x => x[0]);
 }
 
 function parseInlineElements(text, mappings) {
@@ -101,7 +131,6 @@ function parseInlineElements(text, mappings) {
 
     for (let i = 0; i < tags.length; i++) {
         let tag = tags[i];
-        let tagLength = tag.length;
 
         let index = text.indexOf(tag);
         while (index !== -1) {
@@ -145,82 +174,30 @@ function parseInlineElements(text, mappings) {
         let startIndex = minTextIndex;
         let endIndex = secondTextIndex;
 
-        let preText = text.slice(prevIndex, startIndex);
-        let specialText = text.slice(startIndex + tagLength, endIndex);
 
-        preText = trimEnds(preText);
-        preParts.push(<text>{preText}</text>);
-        // if (!emptyContent.includes(preText)) {
-        //     preText = trimEnds(preText);
-        //     preParts.push(<text>{preText}</text>);
-        // }
+        let preText = text.slice(prevIndex, startIndex);
+        if (preText.length !== 0 && preText !== "\n") {
+            preText = trimEnds(preText);
+            preParts.push(<text>{preText}</text>);
+        }
+
+        let specialText = text.slice(startIndex + tagLength, endIndex);
         specialText = replaceTags(specialText);
         specialText = trimEnds(specialText);
-
         preParts.push(mappings[currTag](specialText));
-        // if (!emptyContent.includes(specialText)) {
-        //     specialText = replaceTags(specialText);
-        //     specialText = trimEnds(specialText);
-        //     preParts.push(mappings[currTag](specialText));
-        // }
+        let specialTextSymbolAfterTag = text.slice(endIndex + tagLength, endIndex + tagLength+1)
+        if (specialTextSymbolAfterTag === "\n") {
+            preParts.push(<br/>)
+        }
 
         prevIndex = endIndex + tagLength;
     };
 
     let trailingText = text.slice(prevIndex);
-    trailingText = trimEnds(trailingText);
-    preParts.push(<text>{trailingText}</text>);
-
-    // if (!emptyContent.includes(trailingText)) {
-    //     trailingText = trimEnds(trailingText);
-    //     preParts.push(<text>{trailingText}</text>);
-    // }
+    if (trailingText.length !== 0 && trailingText!=="\n") {
+        trailingText = trimEnds(trailingText);
+        preParts.push(<text>{trailingText}</text>);
+    }
 
     return preParts;
-}
-
-let inlineMappings = {
-    [inlineCodeTag]: parseInlineCode,
-    [inlineEmpTag]: parseInlineEmp,
-};
-
-function parseInlineCode(text) {
-    text = replaceTags(text);
-    return <span
-        className="pr-2 pl-2"
-        style={{ backgroundColor: empBackgroundColor }}
-        dangerouslySetInnerHTML={{ __html: window.PR.prettyPrintOne(text) }}
-    >
-    </span>
-}
-
-function parseInlineEmp(text) {
-    return <span
-        className="pr-2 pl-2"
-        style={{ backgroundColor: empBackgroundColor }}
-    >{text}
-    </span>
-}
-
-function replaceTags(str) {
-    return str.replace(/[<>]/g, replaceTag);
-}
-
-var tagsToReplace = {
-    '<': '&lt;',
-    '>': '&gt;'
-};
-
-function replaceTag(tag) {
-    return tagsToReplace[tag] || tag;
-}
-
-function trimEnds(chunk) {
-    if (chunk.startsWith("\n")) {
-        chunk = chunk.slice(1);
-    }
-    // if (chunk.endsWith("\n")) {
-    //     chunk = chunk.slice(0,chunk.length-1);
-    // }
-    return chunk
 }

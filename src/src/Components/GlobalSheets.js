@@ -1,13 +1,14 @@
 import React, { Component, Fragment } from "react";
 import * as c from "../Utilities/Constants";
-import * as Fetch from "../Utilities/Fetch";
 import { NavLink } from "react-router-dom";
 import QuestionService from "../Services/QuestionService";
+import QuestionSheetService from "../Services/QuestionSheetService";
 
 const borderString = "3px solid rgba(0, 0, 0, 0.6)"
 
 export default class GlobalSheets extends Component {
     static questionService = new QuestionService();
+    static questionSheetService = new QuestionSheetService();
 
     constructor(props) {
         super(props);
@@ -34,26 +35,26 @@ export default class GlobalSheets extends Component {
         this.navigateToSheet(id);
     }
 
-    navigateToSheet(id) {
+    async navigateToSheet(id) {
         if (id === null) {
             return;
         }
 
-        Fetch.GET("QuestionSheet/GetGlobalIndex/" + id)
-            .then(x => x.json())
-            .then(data => {
-                window.history.pushState(null, null, "/question-sheet/global/" + id);
-                this.setState({ currentSheet: data, loaded: true });
-                console.log(data);
-            })
-            .catch(err => console.log(err));
+        let getResult = await GlobalSheets.questionSheetService.getGlobalIndex(id);
+        if (getResult.status === 200) {
+            window.history.pushState(null, null, "/question-sheet/global/" + id);
+            let data = getResult.data;
+            this.setState({ currentSheet: data, loaded: true });
+        } else {
+            alert(getResult.message);
+        }
     }
 
     async onClickDeleteQuestion(e, id) {
         e.preventDefault();
         e.stopPropagation();
 
-        let deleteResult = await this.questionService.deleteGlobal(id);
+        let deleteResult = await GlobalSheets.questionService.deleteGlobal(id);
         if (deleteResult.status === 200) {
             let newState = this.state;
             newState.currentSheet.globalQuestions = newState.currentSheet.globalQuestions
@@ -68,13 +69,19 @@ export default class GlobalSheets extends Component {
         this.props.history.push(c.viewGlobalQuestion + "/" + ind + "/" + this.state.currentSheet.id);
     }
 
-    onClickDeleteChild(e, id) {
+    async onClickDeleteChild(e, id) {
         e.preventDefault();
         e.stopPropagation();
 
-        Fetch.POST("QuestionSheet/DeleteGlobal", id)
-            .then(res => res.json())
-            .then(res => alert(res));
+
+        let deleteResult = await GlobalSheets.questionSheetService.deleteGlobal(id);
+        if (deleteResult.status === 200) {
+            let newState = this.state;
+            newState.currentSheet.children = newState.currentSheet.children.filter(x => x.id !== id);
+            this.setState(newState);
+        } else {
+            alert(deleteResult.message);
+        }
     }
 
     renderCurrentSheet(data) {
@@ -84,10 +91,30 @@ export default class GlobalSheets extends Component {
                 onClick={() => this.navigateToSheet(data.questionSheetId)}
             >
                 <div data-tip="Current folder and all things you can create in it." className="card-body">
-                    <div data-tip=""><h6 className="card-title">{data.name}</h6></div>
-                    <div data-tip=""><NavLink to={c.createGlobalSheetPath + "/" + this.state.currentSheet.id + "/global"}>Create Sheet</NavLink></div>
-                    <div data-tip=""><NavLink to={c.createQuestionPath + "/" + this.state.currentSheet.id + "/global"}>Create Question</NavLink></div>
-                    <div data-tip=""><NavLink to={c.copyQuestionsPath}>Copy Questions</NavLink></div>
+                    <div data-tip="">
+                        <h6 className="card-title">{data.name}</h6>
+                    </div>
+                    <div data-tip="">
+                        <NavLink
+                            to={c.createGlobalSheetPath + "/" + this.state.currentSheet.id + "/global"}
+                            onClick={e=> e.stopPropagation()}>
+                            Create Sheet
+                        </NavLink>
+                    </div>
+                    <div data-tip="">
+                        <NavLink
+                            to={c.createQuestionPath + "/" + this.state.currentSheet.id + "/global"}
+                            onClick={e=> e.stopPropagation()}>
+                            Create Question
+                        </NavLink>
+                    </div>
+                    <div data-tip="">
+                        <NavLink
+                            to={c.copyQuestionsPath}
+                            onClick={e=> e.stopPropagation()}>
+                            Copy Questions
+                        </NavLink>
+                    </div>
                 </div>
             </div>
         )

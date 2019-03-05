@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 
 export default function QuestionView(props) {
     return (
-        <div key={props.q.id} onClick={() => this.props.onClickBody(props.q.id)}>
+        <div key={props.q.id} onClick={() => props.onClickBody(props.q.id)}>
             <div data-tip="" className="card mb-2" style={{ border: c.videoNotesBorder }}>
                 <div className="card-body">
                     <h6 className="card-title">{props.q.name}</h6>
@@ -12,7 +12,7 @@ export default function QuestionView(props) {
                     <a
                         className="ml-1"
                         href="#"
-                        onClick={(e) => this.onClickDelete(e, props.q.id)}
+                        onClick={(e) => props.onClickDelete(e, props.q.id)}
                     >
                         Delete
                     </a>

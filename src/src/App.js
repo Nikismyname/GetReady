@@ -22,14 +22,14 @@ import Tests from "./Tests/TestInlineCode";
 
 import './css/bootstrap-slate-4-1-3.css';
 import "./css/app.css";
+import "./css/desert.css";
 
 let questionService = new QuestionService();
 let questionSheetService = new QuestionSheetService();
 
 const ViewGlobalQuestionWithInitialData = WithInitialData(
   ViewGlobalQuestion,
-  questionService.viewGlobalQuestion,
-  true
+  questionService.getGlobalInit,
 );
 
 export default class App extends Component {
@@ -48,14 +48,12 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    console.log(localStorage.getItem("token"));
     var userString = localStorage.getItem("user");
     if (userString !== null) {
       let user = JSON.parse(userString);
       this.setState(() => ({ user }));
     }
   }
-
 
   render() {
     const App = (
@@ -100,7 +98,6 @@ export default class App extends Component {
           </div>
         </div>
       </BrowserRouter>
-
     );
 
     return App;

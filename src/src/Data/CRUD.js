@@ -21,7 +21,7 @@ function request(method) {
         let fullPath = fetchRoot + path;
 
         let Authorization = "";
-        let token = localStorage.getItem(token);
+        let token = localStorage.getItem("token");
         if (token !== null) {
             Authorization = `Bearer ${token}`
         }
@@ -42,7 +42,15 @@ function request(method) {
             console.log(result);
         }
 
-        let json = await result.json();
+        ///For the cases when we send empty Ok() responses
+        let json;
+        try {
+            json = await result.json();
+        } catch{
+            json = "No Body";
+        }
+        ///...
+        
         if (shouldConsoleLog) {
             console.log("JSON RESULT");
             console.log(json);
@@ -52,9 +60,9 @@ function request(method) {
             return { status: 200, data: json };
         } else if (result.status === 400) {
             return { status: 400, message: json };
+        } else {
+            return {status: 500, result, json}
         }
-
-        return json;
     }
 }
 

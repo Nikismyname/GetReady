@@ -1,6 +1,5 @@
 import React, { Component, Fragment } from "react";
 import * as c from "../Utilities/Constants";
-import * as Fetch from "../Utilities/Fetch";
 import { DragDropContext } from 'react-beautiful-dnd';
 import { renderDroppable, extOnDragEnd } from "../Utilities/ReactBeautiful/Constants";
 import { NavLink } from "react-router-dom";
@@ -39,6 +38,8 @@ export default class PesonalSheet extends Component {
         this.App = this.App.bind(this);
 
         this.renderTestLists = this.renderTestLists.bind(this);
+
+        this.parseIncomingSheetData = this.parseIncomingSheetData.bind(this);
     }
 
     componentWillMount() {
@@ -46,48 +47,51 @@ export default class PesonalSheet extends Component {
         this.navigateToSheet(id);
     }
 
-    navigateToSheet(id) {
+    async navigateToSheet(id) {
         if (id === null) {
             return;
         }
 
-        Fetch.GET("QuestionSheet/GetPersonalIndex/" + id)
-            .then(res => {
-                return res.json()
-            })
-            .then(data => {
-                window.history.pushState(null, null, "/question-sheet/personal/" + id);
-                let state = this.state;
-                state.currentSheet = data;
-                state.loaded = true;
-                state.col1 = [];
-                state.col2 = [];
-                state.col3 = [];
-                for (let i = 0; i < data.personalQuestions.length; i++) {
-                    let question = data.personalQuestions[i];
-                    switch (question.column) {
-                        case 1:
-                            state.col1.push(question);
-                            break;
-                        case 2:
-                            state.col2.push(question);
-                            break;
-                        case 3:
-                            state.col3.push(question);
-                            break;
-                        default:
-                            state.col1.push(question);
-                            break;
-                    }
-                };
+        let getResult = await PesonalSheet.questionSheetService.getPersonalIndex(id);
+        if (getResult.status === 200) {
+            window.history.pushState(null, null, "/question-sheet/personal/" + id);
+            let data = getResult.data;
+            this.parseIncomingSheetData(data);
+        } else {
+            alert(getResult.message);
+        }
+    }
 
-                state.col1 = state.col1.sort((a, b) => a.order - b.order);
-                state.col2 = state.col2.sort((a, b) => a.order - b.order);
-                state.col3 = state.col3.sort((a, b) => a.order - b.order);
+    parseIncomingSheetData(data) {
+        let state = this.state;
+            state.currentSheet = data;
+            state.loaded = true;
+            state.col1 = [];
+            state.col2 = [];
+            state.col3 = [];
+            for (let i = 0; i < data.personalQuestions.length; i++) {
+                let question = data.personalQuestions[i];
+                switch (question.column) {
+                    case 1:
+                        state.col1.push(question);
+                        break;
+                    case 2:
+                        state.col2.push(question);
+                        break;
+                    case 3:
+                        state.col3.push(question);
+                        break;
+                    default:
+                        state.col1.push(question);
+                        break;
+                }
+            };
 
-                this.setState(() => (state));
-            })
-            .catch(err => console.log(err));
+            state.col1 = state.col1.sort((a, b) => a.order - b.order);
+            state.col2 = state.col2.sort((a, b) => a.order - b.order);
+            state.col3 = state.col3.sort((a, b) => a.order - b.order);
+
+            this.setState(() => (state));   
     }
 
     renderQuestions(questions) {
@@ -109,11 +113,13 @@ export default class PesonalSheet extends Component {
         e.preventDefault();
         e.stopPropagation();
 
-        let deleteResult = await this.questionService.deletePersonal(id);
+        let deleteResult = await PesonalSheet.questionService.deletePersonal(id);
 
         if (deleteResult.status === 200) {
             let newState = this.state;
-            newState.currentSheet.personalQuestions = newState.currentSheet.personalQuestions.filter(x => x.id !== id);
+            newState.col1 = newState.col1.filter(x => x.id !== id);
+            newState.col2 = newState.col2.filter(x => x.id !== id);
+            newState.col3 = newState.col3.filter(x => x.id !== id);
             this.setState(newState);
         } else {
             alert("Delete did not work!");
@@ -121,6 +127,7 @@ export default class PesonalSheet extends Component {
     }
 
     onClickViewQuestion(ind) {
+        return;
         this.props.history.push(c.viewGlobalQuestion + "/" + ind + "/" + this.state.currentSheet.id);
     }
 
@@ -130,7 +137,7 @@ export default class PesonalSheet extends Component {
             orderings: orders,
         };
 
-        let reorderResult = await this.questionService.reorder(data);
+        let reorderResult = await PesonalSheet.questionService.reorder(data);
         if (reorderResult.status === 200) {
             console.log("Ordering worked!");
         } else {
@@ -138,13 +145,19 @@ export default class PesonalSheet extends Component {
         }
     }
 
-    onClickDeleteChild(e, id) {
+    ///TODO: Why delete Blobal Here??
+    async onClickDeleteChild(e, id) {
         e.preventDefault();
         e.stopPropagation();
-        ///TODO: Why Delete Global HERE?
-        Fetch.POST("QuestionSheet/DeleteGlobal", id)
-            .then(res => res.json())
-            .then(res => alert(res));
+
+        let deleteResult = await PesonalSheet.questionSheetService.deletePersonal(id);
+        if (deleteResult.status === 200) {
+            let newState = this.state;
+            newState.currentSheet.children = newState.currentSheet.children.filter(x => x.id !== id);
+            this.setState(newState);
+        } else {
+            alert(deleteResult.message);
+        }
     }
 
     renderCurrentSheet(data) {
@@ -154,10 +167,30 @@ export default class PesonalSheet extends Component {
                 onClick={() => this.navigateToSheet(data.questionSheetId)}
             >
                 <div data-tip="Current folder and all things you can create in it." className="card-body">
-                    <div data-tip=""><h6 className="card-title">{data.name}</h6></div>
-                    <div data-tip=""><NavLink to={c.createGlobalSheetPath + "/" + this.state.currentSheet.id + "/personal"}>Create Sheet</NavLink></div>
-                    <div data-tip=""><NavLink to={c.createQuestionPath + "/" + this.state.currentSheet.id + "/personal"}>Create Question</NavLink></div>
-                    <div data-tip=""><NavLink to={c.testPath + "/" + this.state.currentSheet.id}>Start Test</NavLink></div>
+                    <div data-tip="">
+                        <h6 className="card-title">{data.name}</h6>
+                    </div>
+                    <div data-tip="">
+                        <NavLink
+                            to={c.createGlobalSheetPath + "/" + this.state.currentSheet.id + "/personal"}
+                            onClick={e => e.stopPropagation()}>
+                            Create Sheet
+                        </NavLink>
+                    </div>
+                    <div data-tip="">
+                        <NavLink
+                            to={c.createQuestionPath + "/" + this.state.currentSheet.id + "/personal"}
+                            onClick={e => e.stopPropagation()} >
+                            Create Question
+                        </NavLink>
+                    </div>
+                    <div data-tip="">
+                        <NavLink
+                            to={c.testPath + "/" + this.state.currentSheet.id}
+                            onClick={e => e.stopPropagation()} >
+                            Start Test
+                        </NavLink>
+                    </div>
                 </div>
             </div>
         )

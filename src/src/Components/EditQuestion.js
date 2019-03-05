@@ -22,16 +22,15 @@ export default class EditQuestion extends Component {
 
         this.onChangeInput = this.onChangeInput.bind(this);
         this.renderComparisonData = this.renderQuestionCreationData.bind(this);
-        this.onClickRegister = this.onClickCreate.bind(this);
-        this.onClickCreate = this.onClickCreate.bind(this);
+        this.onClickEdit = this.onClickEdit.bind(this);
         this.onClickBack = this.onClickBack.bind(this);
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         let id = this.props.match.params.id;
         let scope = this.props.match.params.scope;
 
-        let getResult = this.questionService.get(id, scope);
+        let getResult = await EditQuestion.questionService.get(id, scope);
 
         if (getResult.status === 200) {
             let q = getResult.data;
@@ -54,9 +53,9 @@ export default class EditQuestion extends Component {
         this.setState(newState);
     }
 
-    onClickCreate() {
+    async onClickEdit() {
         let id = this.props.match.params.id;
-
+        let scope = this.props.match.params.scope;
         let data = {
             question: this.state.question,
             answer: this.state.answer,
@@ -66,25 +65,17 @@ export default class EditQuestion extends Component {
             id: id,
         };
 
-        let scope = this.props.match.params.scope;
-        console.log(scope);
+        let editResult = await EditQuestion.questionService.edit(data, scope);
 
-        let requestPath = this.state.isGlobal ? "EditGlobal" : "EditPersonal";
-        console.log(requestPath);
-
-        Fetch.POST(`Question/${requestPath}`, data)
-            .then(x => x.json())
-            .then((data) => {
-                if (data !== 0) {
-                    if (this.state.isGlobal) {
-                        this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.sheetId);
-                    } else {
-                        this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.sheetId);
-                    }
-                } else {
-                    alert("Create Question Did NOT Work!");
-                }
-            }).catch(err => console.log(err));
+        if (editResult.status === 200) {
+            if (this.state.isGlobal) {
+                this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.sheetId);
+            } else {
+                this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.sheetId);
+            }
+        } else {
+            alert(editResult.message);
+        }
     }
 
     onClickBack() {
@@ -98,15 +89,24 @@ export default class EditQuestion extends Component {
     renderQuestionCreationData() {
         let fields = ["name", "question", "answer", "comment", "difficulty"];
 
-        return fields.map(x => this.renderField(x));
+        return (
+            <div className="row">
+                <div className="col-sm-8">
+                    {fields.map(x => this.renderField(x))}
+                </div>
+                <div className="col-sm-4">
+                    {c.formattingMap.map(x => <p>{x}</p> )}
+                </div>
+            </div>
+        )
     }
 
     renderField(x) {
         if (x === "name" || x === "difficulty") {
             return (
                 <div className="form-group row" key={x}>
-                    <label className="col-sm-2 col-form-label text-right">{x}</label>
-                    <div className="col-sm-6">
+                    <label className="col-sm-3 col-form-label text-right">{x}</label>
+                    <div className="col-sm-9">
                         <input
                             onChange={(e) => this.onChangeInput(x, e)}
                             value={this.state[x]}
@@ -118,8 +118,8 @@ export default class EditQuestion extends Component {
         } else {
             return (
                 <div className="form-group row" key={x}>
-                    <label className="col-sm-2 col-form-label text-right">{x}</label>
-                    <div className="col-sm-6">
+                    <label className="col-sm-3 col-form-label text-right">{x}</label>
+                    <div className="col-sm-9">
                         <Textarea
                             onChange={(e) => this.onChangeInput(x, e)}
                             className="form-control-black"
@@ -138,7 +138,7 @@ export default class EditQuestion extends Component {
                 <div className="offset-2 col-sm-2">
                     <button
                         className="btn btn-primary btn-block btn-warning"
-                        onClick={this.onClickCreate}> Edit
+                        onClick={this.onClickEdit}> Edit
                         </button>
                 </div>
                 <div className="col-sm-2">

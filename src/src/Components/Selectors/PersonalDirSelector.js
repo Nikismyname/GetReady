@@ -1,9 +1,11 @@
 import React, { Component, Fragment } from "react";
-import * as Fetch from "../../Utilities/Fetch";
 import "../../css/personal-dir-selector.css";
 import CreateDir from "../CreateQuestionSheet";
+import QuestionSheetService from "../../Services/QuestionSheetService";
 
 export default class PersonalDirSelector extends Component {
+    static questionSheetService = new QuestionSheetService();
+        
     constructor(props) {
         super(props);
 
@@ -32,21 +34,21 @@ export default class PersonalDirSelector extends Component {
         this.onCallbackDirCreated = this.onCallbackDirCreated.bind(this);
     }
 
-    componentDidMount() {
-        console.log("Directory Picker Has Mounted");
-        Fetch.GET("QuestionSheet/GetAllPersonal")
-            .then(x => x.json())
-            .then(data => {
-                for (let i = 0; i < data.length; i++) {
-                    data[i].isSelected = false;
-                };
+    async componentDidMount() {
+        let getAllResult = await PersonalDirSelector.questionSheetService.getallPersonal();
+        if (getAllResult.status === 200) {
+            let data = getAllResult.data;
+            for (let i = 0; i < data.length; i++) {
+                data[i].isSelected = false;
+            };
 
-                this.setState(() => ({
-                    sheets: data,
-                    loaded: true,
-                }));
-            })
-            .catch(err => console.log(err))
+            this.setState(() => ({
+                sheets: data,
+                loaded: true,
+            }));
+        } else {
+            alert(getAllResult.message);
+        }
     }
 
     onClickSheet(e, id) {

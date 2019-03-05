@@ -1,8 +1,10 @@
 import React, { Component, Fragment } from "react";
-import * as Fetch from "../../Utilities/Fetch";
 import "../../css/personal-dir-selector.css";
+import QuestionSheetService from "../../Services/QuestionSheetService";
 
 export default class GlobalQuestionPicker extends Component {
+    static questionSheetService = new QuestionSheetService();
+
     constructor(props) {
         super(props);
 
@@ -29,26 +31,24 @@ export default class GlobalQuestionPicker extends Component {
         this.onClickSelectFile = this.onClickSelectFile.bind(this);
     }
 
-    componentDidMount() {
-        console.log("Global Question Picker Has Mounted");
-        Fetch.GET("QuestionSheet/GetAllGlobal")
-            .then(x => x.json())
-            .then(data => {
-                console.log(data);
-
-                for (let i = 0; i < data.length; i++) {
-                    data[i].isSelected = false;
-                    for (let j = 0; j < data[i].globalQuestions.length; j++) {
-                        data[i].globalQuestions[j].isSelected = false;
-                    };
+    async componentDidMount() {
+        let getAllResult = await GlobalQuestionPicker.questionSheetService.getAllGlobal();
+        if (getAllResult.status === 200) {
+            let data = getAllResult.data;
+            for (let i = 0; i < data.length; i++) {
+                data[i].isSelected = false;
+                for (let j = 0; j < data[i].globalQuestions.length; j++) {
+                    data[i].globalQuestions[j].isSelected = false;
                 };
+            };
 
-                this.setState(() => ({
-                    sheets: data,
-                    loaded: true,
-                }));
-            })
-            .catch(err => console.log(err))
+            this.setState(() => ({
+                sheets: data,
+                loaded: true,
+            }));
+        } else {
+            alert(getAllResult.message);   
+        }
     }
 
     onClickExpand(e, id) {

@@ -1,8 +1,10 @@
 import React, { Component, Fragment } from "react";
 import * as c from "../Utilities/Constants";
-import * as Fetch from "../Utilities/Fetch";
+import QuestionSheetService from "../Services/QuestionSheetService";
 
-export default class CreateSheet extends Component {
+export default class CreateQuestionSheet extends Component {
+    static questionSheetService = new QuestionSheetService();
+        
     constructor(props) {
         super(props);
 
@@ -33,9 +35,9 @@ export default class CreateSheet extends Component {
         this.setState(newState);
     }
 
-    onClickCreateSheet() {
+    async onClickCreateSheet() {
         let parentSheetId = this.props.match.params.id;
-
+        let scope = this.props.match.params.scope;
         let data = {
             name: this.state.name,
             description: this.state.description,
@@ -43,28 +45,21 @@ export default class CreateSheet extends Component {
             importance: this.state.importance,
             parentSheetId: parentSheetId,
         };
-        let path = this.state.isGlobal ? "CreateGlobalSheet" : "CreatePersonalSheet";
-        Fetch.POST(`QuestionSheet/${path}`, data)
-            .then(x => x.json())
-            .then((res) => {
-                if (res !== 0) {
-                    console.log("RES HERE");
-                    console.log(res);
 
-                    if (this.state.isGlobal) {
-                        this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.id);
-                    } else {
-                        if (this.props.isInternal) {
-                            this.props.callBack(res, data.name);
-                        } else {
-                            this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.id);
-                        }
-                    }
+        let createResult = await CreateQuestionSheet.questionSheetService.create(data, scope);
+        if (createResult.status === 200) {
+            if (this.state.isGlobal) {
+                this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.id);
+            } else {
+                if (this.props.isInternal) {
+                    this.props.callBack(createResult.data, data.name);
                 } else {
-                    alert("Register did not work!");
+                    this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.id);
                 }
-            })
-            .catch(err => console.log(err));
+            }
+        } else {
+            alert(createResult.message);
+        }
     }
 
     onClickBack() {

@@ -1,16 +1,18 @@
 import React, { Component, Fragment } from "react";
 import Textarea from "react-expanding-textarea";
 import * as c from "../Utilities/Constants";
-import { parseEmpAndCode } from "../Utilities/QuestionFunctions";
+import WithPrettyPrint from "../HOC/WithPrettyPrint";
+import { formatText } from "../Utilities/QuestionFunctions";
 
-import "../css/desert.css";
-
-export default class ViewGlobalQuestion extends Component {
+class ViewGlobalQuestion extends Component {
     constructor(props) {
         super(props);
 
-        console.log("INITIAL DATA:");
-        console.log(this.props.data);
+        ///Setting the init data to something safe in case none comes;
+        let initData = {};
+        if (this.props.data) {
+            initData = this.props.data;
+        }
 
         this.state = {
             PRLoaded: false,
@@ -18,7 +20,7 @@ export default class ViewGlobalQuestion extends Component {
             loaded: false,
             showComment: false,
             showAnswer: false,
-            ...this.props.data,
+            ...initData,
         };
 
         this.App = this.App.bind(this);
@@ -68,7 +70,7 @@ export default class ViewGlobalQuestion extends Component {
     }
 
     renderQuestion(q) {
-        let renderedText = parseEmpAndCode(q.question);
+        let renderedText = formatText(q.question);
         return (
             <Fragment>
                 <h1>Question</h1>
@@ -78,7 +80,7 @@ export default class ViewGlobalQuestion extends Component {
     }
 
     renderComment(text) {
-        let renderedText = parseEmpAndCode(text);
+        let renderedText = formatText(text);
 
         if (this.state.showComment) {
             return (
@@ -93,7 +95,7 @@ export default class ViewGlobalQuestion extends Component {
     }
 
     renderAnswer(text) {
-        let renderedText = parseEmpAndCode(text);
+        let renderedText = formatText(text);
 
         if (this.state.showAnswer) {
             return (
@@ -123,3 +125,6 @@ export default class ViewGlobalQuestion extends Component {
         return this.App();
     }
 }
+
+const ViewGlobalQuestionWithPrettyPrint = WithPrettyPrint(ViewGlobalQuestion);
+export default ViewGlobalQuestionWithPrettyPrint;

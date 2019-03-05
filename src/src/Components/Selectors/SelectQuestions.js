@@ -1,10 +1,12 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import PersonalDirSelector from "./PersonalDirSelector";
 import QuestionPicker from "./GlobalQuestionPicker";
-import * as Fetch from "../../Utilities/Fetch";
 import * as c from "../../Utilities/Constants";
+import QuestionService from "../../Services/QuestionService";
 
 export default class SelectQuestions extends Component {
+    static questionService = new QuestionService();
+        
     constructor(props) {
         super(props);
         this.state = {
@@ -18,30 +20,22 @@ export default class SelectQuestions extends Component {
         this.selectedQuestions = this.selectedQuestions.bind(this);
     }
 
-    selectedDirectory(id) {
-        console.log("SelectedId: " + id);
+    async selectedDirectory(id) {
         this.setState(() => ({ selectedDir: id }));
         let data = {
             selectedDir: id,
             selectedQuestions: this.state.selectedQuestions,
         }
-        console.log(data);
-        Fetch.POST("Question/CopyQuestions", data)
-            .then(x => x.json())
-            .then(res => {
-                console.log(res);
-                if (res === true) {
-                    this.props.history.push(c.personalQuestionSheetsPaths + "/" + id)
-                } else {
-                    alert("Copy Questions did not work!");
-                }
-            })
-            .catch(err=> console.log(err));
+
+        let copyResult = await SelectQuestions.questionService.copyQuestions(data);
+        if (copyResult.status === 200) {
+            this.props.history.push(c.personalQuestionSheetsPaths + "/" + id);
+        } else {
+            alert(copyResult.message)
+        }
     }
 
     selectedQuestions(intArray) {
-        // console.log("Array Here");
-        // console.log(intArray);
         this.setState(() => ({
             selectedQuestions: intArray,
             selectingQuestions: false,
