@@ -53,9 +53,9 @@ export default class QuestionServieces {
         }
     }
     
-    async createQuestion(data, isGlobal) {
+    async createQuestion(data, scope) {
         try {
-            let path = isGlobal ? "Question/CreateGlobal" : "Question/CreatePersonal";
+            let path = scope==="global" ? "Question/CreateGlobal" : "Question/CreatePersonal";
             let result = await post(path, data);
             return result;
         } catch (err) {

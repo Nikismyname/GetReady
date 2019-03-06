@@ -19,6 +19,7 @@ import CopyQuestion from "./Components/Selectors/SelectQuestions";
 import Test from "./Components/Test/Test";
 import EditQuestion from "./Components/EditQuestion";
 import Tests from "./Tests/TestInlineCode";
+import EditSheet from "./Components/EditSheet";
 
 import './css/bootstrap-slate-4-1-3.css';
 import "./css/app.css";
@@ -89,6 +90,9 @@ export default class App extends Component {
 
               <Route exact path={c.editQuestionPath + "/:id/:scope/:sheetId"}
                 component={EditQuestion} />
+              
+              <Route exact path={c.editQuestionSheetPath + "/:id/:scope/:sheetId"}
+                component={EditSheet} />
 
               <Route exact path="/"
                 render={(props) => <Home {...props} user={this.state.user} />} />

@@ -206,6 +206,12 @@ export default class PesonalSheet extends Component {
                 <div className="card-body">
                     <h6 className="card-title">{x.name}</h6>
                     <a href="#" onClick={(e) => this.onClickDeleteChild(e, x.id)}>Delete</a>
+                    <NavLink
+                        className="ml-2"
+                        to={c.editQuestionSheetPath + "/" + x.id+"/personal/"+ this.state.currentSheet.id}
+                        onClick={e=> e.stopPropagation()}>
+                        Edit
+                    </NavLink>
                 </div>
             </div>
         ));

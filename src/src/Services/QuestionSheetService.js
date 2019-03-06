@@ -37,6 +37,16 @@ export default class QuestionSheetService{
         }
     }
 
+    async getOne(id, scope) { 
+        try {
+            let path = scope === "global" ? "QuestionSheet/GetOnePublic" : "QuestionSheet/GetOnePersonal";
+            let result = await get(path, id);
+            return result;
+        } catch (err) {
+            this.handleError(err);
+        }
+    }
+
     async create(data, scope) {
         try {
             let path = scope === "global" ?
@@ -45,6 +55,16 @@ export default class QuestionSheetService{
             let result = await post(path, data);
             return result;
         }catch (err) {
+            this.handleError(err);
+        }
+    }
+
+    async edit(data, scope) {
+        try {
+            let path = scope === "global" ? "QuestionSheet/EditGlobal" : "QuestionSheet/EditPersonal";
+            let result = await post(path, data);
+            return result;
+        } catch(err){
             this.handleError(err);
         }
     }

@@ -1,37 +1,12 @@
-import React, { Component, Fragment } from "react";
-import * as c from "../Utilities/Constants";
-import * as Fetch from "../Utilities/Fetch";
+import React from "react";
+import BindingForm from "./BindingForm/BindingForm";
 import UserService from "../Services/UserService";
 
 const userService = new UserService();
 
-export default class Login extends Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            username: "",
-            password: "",
-        };
-
-        this.onChangeInput = this.onChangeInput.bind(this);
-        this.renderComparisonData = this.renderLoginData.bind(this);
-        this.onClickLogin = this.onClickLogin.bind(this);
-    }
-
-    onChangeInput(target, event) {
-        let newState = this.state;
-        newState[target] = event.target.value;
-        this.setState(newState);
-    }
-
-    async onClickLogin() {
-        let data = {
-            username: this.state.username,
-            password: this.state.password,
-        };
-
-
+export default function Login(props) { 
+    
+    async function onClickLogin(data) {
         let loginResult = await userService.login(data);
 
         if (loginResult.status === 200) {
@@ -39,50 +14,18 @@ export default class Login extends Component {
             console.log(loginData);
             localStorage.setItem("token", loginData.token);
             localStorage.setItem("user", JSON.stringify(loginData));
-            this.props.setUser(loginData);
-            this.props.history.push('/');
+            props.setUser(loginData);
+            props.history.push('/');
         } else {
-            alert(loginResult.message);
+            return loginResult;
         }
     };
 
-    renderLoginData() {
-        let fields = ["username", "password"];
-
-        return fields.map(x =>
-            <div className="form-group row" key={x}>
-                <label className="col-sm-2 col-form-label text-right">{x}</label>
-                <div className="col-sm-6">
-                    <input
-                        onChange={(e) => this.onChangeInput(x, e)}
-                        type={(x === "password" || x === "repeatPassword") ? "password" : "text"}
-                        value={this.state[x]}
-                        className="form-control-black"
-                        style={{ backgroundColor: c.secondaryColor }} />
-                </div>
-            </div>
-        );
-    }
-
-    renderLogInButton() {
-        return (
-            <div className="row">
-                <div className="offset-2 col-sm-6">
-                    <button
-                        className="btn btn-primary"
-                        onClick={this.onClickLogin}> Login </button>
-                </div>
-            </div>
-        );
-    }
-
-    render() {
-        return (
-            <Fragment>
-                <h1>LOGIN</h1>
-                {this.renderLoginData()}
-                {this.renderLogInButton()}
-            </Fragment>
-        );
-    }
+    return (
+        <BindingForm formName="Login Form" onSubmit={onClickLogin}>
+            <input type="text" name="username" />
+            <input type="password" name="password" />
+            <button type="submit">Login</button>
+        </BindingForm>
+    )
 }

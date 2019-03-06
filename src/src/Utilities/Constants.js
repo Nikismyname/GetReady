@@ -14,6 +14,7 @@ export const createPersonalSheetPath = "/question-sheet/personal/create";
 export const viewGlobalQuestion = "/question/global/view";
 export const copyQuestionsPath = "/question/copy";
 export const editQuestionPath = "/question/edit";
+export const editQuestionSheetPath = "/question-sheet/edit";
 export const testPath = "/test";
 
 export const videoNotesBorder = "1px solid rgba(3, 91, 255, 0.6)";

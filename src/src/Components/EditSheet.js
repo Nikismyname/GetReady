@@ -1,21 +1,19 @@
 import React, { Component, Fragment } from "react";
 import * as c from "../Utilities/Constants";
-import Textarea from "react-expanding-textarea";
-import QuestionService from "../Services/QuestionService";
+import QuestionSheetService from "../Services/QuestionSheetService";
 import BindingForm from "./BindingForm/BindingForm";
 
-export default class EditQuestion extends Component {
-    static questionService = new QuestionService();
+export default class EditSheet extends Component {
+    static questionSheetService = new QuestionSheetService();
 
     constructor(props) {
         super(props);
 
         this.state = {
-            question: "",
-            answer: "",
-            comment: "",
             name: "",
-            difficulty: 0,
+            description: "",
+            difficulty: "",
+            importance: "",
             isGlobal: this.props.match.params.scope === "global" ? true : false,
             loaded: false,
         };
@@ -28,17 +26,16 @@ export default class EditQuestion extends Component {
         let id = this.props.match.params.id;
         let scope = this.props.match.params.scope;
 
-        let getResult = await EditQuestion.questionService.get(id, scope);
+        let getResult = await EditSheet.questionSheetService.getOne(id, scope);
 
         if (getResult.status === 200) {
-            let q = getResult.data;
+            let s = getResult.data;
             this.setState(() => ({
                 loaded: true,
-                question: q.question,
-                answer: q.answer,
-                comment: q.comment,
-                name: q.name,
-                difficulty: q.difficulty,
+                name: s.name,
+                description: s.description,
+                difficulty: s.difficulty,
+                importance: s.importance,
             }));
         } else {
             alert(getResult.message);
@@ -50,7 +47,7 @@ export default class EditQuestion extends Component {
         let scope = this.props.match.params.scope;
         data["id"] = id;
 
-        let editResult = await EditQuestion.questionService.edit(data, scope);
+        let editResult = await EditSheet.questionSheetService.edit(data,scope);
 
         if (editResult.status === 200) {
             if (this.state.isGlobal) {
@@ -71,17 +68,14 @@ export default class EditQuestion extends Component {
         }
     }
 
-    //let fields = ["name", "question", "answer", "comment", "difficulty"];
-
     render() {
         if (this.state.loaded == true) {
             return (
-                <BindingForm formName="Edit Question Form" onSubmit={this.onClickEdit} formattingMap>
+                <BindingForm formName="Edit Question Form" onSubmit={this.onClickEdit} >
                     <input type="text" name="name" value={this.state.name} />
-                    <Textarea name="question" value={this.state.question} />
-                    <Textarea name="answer" value={this.state.answer} />
-                    <Textarea name="comment" value={this.state.comment} />
+                    <input type="text" name="description" value={this.state.description} />
                     <input type="number" name="difficulty" value={this.state.difficulty} />
+                    <input type="number" name="importance" value={this.state.importance} />
                     <button type="submit" >Edit</button>
                     <button type="button" onClick={this.onClickBack}>Back</button>
                 </BindingForm>
