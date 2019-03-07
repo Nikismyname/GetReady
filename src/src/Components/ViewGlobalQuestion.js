@@ -38,7 +38,7 @@ class ViewGlobalQuestion extends Component {
     }
 
     onClickBack() {
-        this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.sheetId)
+        this.props.history.push(c.globalQuestionSheetsPath + "/" + this.props.match.params.sheetId)
     }
 
     renderAnswerInput() {

@@ -33,11 +33,17 @@ export default class BindingForm extends Component {
 
     async onFormSubmit(e) {
         e.preventDefault();
-        await this.setState({ERRORS: []});
-        let response = await this.props.onSubmit(this.state);
+        await this.setState({ ERRORS: [] });
+
+        let newState = JSON.parse(JSON.stringify(this.state));
+        delete newState.ERRORS;
+
+        let response = await this.props.onSubmit(newState);
         if (typeof response !== "undefined") {
             if (response.message.errors) {
                 this.handeleValidationErrors(response.message.errors);
+            } else if (typeof response.message === "string") {
+                alert(response.message);
             }
         }
     }
@@ -107,6 +113,13 @@ export default class BindingForm extends Component {
         });
     }
 
+    fixLabelText(text) {
+        text = text
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, function (str) { return str.toUpperCase(); })
+        return text;
+    }
+
     getNonButtons() {
         let nonButtons = React.Children.map(this.props.children, child => {
             if (child.type === "input" || child.type.name === "ExpandingTextarea") {
@@ -114,7 +127,7 @@ export default class BindingForm extends Component {
                     <Fragment>
                     <ShowError prop={child.props.name} ERRORS={this.state.ERRORS} />
                     <div className="row">
-                        <label className={lableClases}>{child.props.name}</label>
+                        <label className={lableClases}>{this.fixLabelText(child.props.name)}</label>
                         <div className={inputColumns}>
                             {React.cloneElement(child,
                                 {

@@ -1,7 +1,8 @@
 export const fetchRoot = "https://localhost:44342/api/";
 
 function request(method) {
-    return async function (path, data = {}, shouldConsoleLog = false, options = {}) {
+    let shouldConsoleLog = true;
+    return async function (path, data = null, options = {}) {
         if (path.startsWith("/")) {
             path = path.slice(1);
         }
@@ -10,12 +11,13 @@ function request(method) {
             path = path.substring(0, path.length - 1);
         }
 
-        let body = null;
-        if (method.toLowerCase() === "get" && data !== {}) {
+        let body = {};
+
+        if (method.toLowerCase() === "get" && data !== null) {
             path = path + "/" + data;
             data = {};
-        } else {
-            body = JSON.stringify(data);
+        } else if(method.toLowerCase() !== "get") {
+            body = { body: JSON.stringify(data) };
         }
 
         let fullPath = fetchRoot + path;
@@ -33,7 +35,7 @@ function request(method) {
                 'Content-Type': 'application/json',
                 Authorization,
             },
-            body,
+            ...body,
             ...options,
         });
 

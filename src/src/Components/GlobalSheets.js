@@ -12,10 +12,14 @@ export default class GlobalSheets extends Component {
 
     constructor(props) {
         super(props);
+
+        let isAdmin = this.props.user ? this.props.user.role === "Admin" ? true : false : false;
+
         this.state = {
             currentSheet: {}, //id: 1, children: [], description: "", difficulty: 1, globalQuestions: []
             //importance: 10, name: "", order: 1, questionSheetId: null/1  
             loaded: false,
+            isAdmin,
         };
 
         this.renderCurrentSheet = this.renderCurrentSheet.bind(this);
@@ -32,6 +36,9 @@ export default class GlobalSheets extends Component {
 
     componentWillMount() {
         let id = this.props.match.params.id;
+        if (id == -1) {
+            id = this.props.savedId;
+        }
         this.navigateToSheet(id);
     }
 
@@ -40,9 +47,13 @@ export default class GlobalSheets extends Component {
             return;
         }
 
+        let newPath = c.globalQuestionSheetsPath +"/"+id;
+        this.props.setLoginReturnPath(newPath);
+        this.props.setUserReturnId(id);
+
         let getResult = await GlobalSheets.questionSheetService.getGlobalIndex(id);
         if (getResult.status === 200) {
-            window.history.pushState(null, null, "/question-sheet/global/" + id);
+            window.history.pushState(null, null, newPath);
             let data = getResult.data;
             this.setState({ currentSheet: data, loaded: true });
         } else {
@@ -94,24 +105,34 @@ export default class GlobalSheets extends Component {
                     <div data-tip="">
                         <h6 className="card-title">{data.name}</h6>
                     </div>
+
+                    {this.state.isAdmin ?
+                        (
+                            <Fragment>
+                                <div data-tip="">
+                                    <NavLink
+                                        to={c.createGlobalSheetPath + "/" +
+                                            this.state.currentSheet.id + "/global"}
+                                        onClick={e => e.stopPropagation()}>
+                                        Create Sheet
+                                    </NavLink>
+                                </div>
+                                <div data-tip="">
+                                    <NavLink
+                                        to={c.createQuestionPath + "/" +
+                                            this.state.currentSheet.id + "/global"}
+                                        onClick={e => e.stopPropagation()}>
+                                        Create Question
+                                    </NavLink>
+                                </div>
+                            </Fragment>
+                        ) : null
+                    }
+
                     <div data-tip="">
                         <NavLink
-                            to={c.createGlobalSheetPath + "/" + this.state.currentSheet.id + "/global"}
-                            onClick={e=> e.stopPropagation()}>
-                            Create Sheet
-                        </NavLink>
-                    </div>
-                    <div data-tip="">
-                        <NavLink
-                            to={c.createQuestionPath + "/" + this.state.currentSheet.id + "/global"}
-                            onClick={e=> e.stopPropagation()}>
-                            Create Question
-                        </NavLink>
-                    </div>
-                    <div data-tip="">
-                        <NavLink
-                            to={c.copyQuestionsPath}
-                            onClick={e=> e.stopPropagation()}>
+                            to={c.copyQuestionsPath+"/"+ this.state.currentSheet.id}
+                            onClick={e => e.stopPropagation()}>
                             Copy Questions
                         </NavLink>
                     </div>
@@ -129,13 +150,17 @@ export default class GlobalSheets extends Component {
             >
                 <div className="card-body">
                     <h6 className="card-title">{x.name}</h6>
-                    <a href="#" onClick={(e) => this.onClickDeleteChild(e, x.id)}>Delete</a>
-                    <NavLink
-                        className="ml-2"
-                        to={c.editQuestionSheetPath + "/" + x.id+"/global/"+ this.state.currentSheet.id}
-                        onClick={e=> e.stopPropagation()}>
-                        Edit
-                    </NavLink>
+                    {this.state.isAdmin ? (
+                        <Fragment>
+                            <a href="#" onClick={(e) => this.onClickDeleteChild(e, x.id)}>Delete</a>
+                            <NavLink
+                                className="ml-2"
+                                to={c.editQuestionSheetPath + "/" + x.id + "/global/" + this.state.currentSheet.id}
+                                onClick={e => e.stopPropagation()}>
+                                Edit
+                            </NavLink>
+                        </Fragment>
+                    ) : null}
                 </div>
             </div>
         ));
@@ -164,8 +189,23 @@ export default class GlobalSheets extends Component {
                                 <div className="card-body">
                                     <h6 className="card-title">{x.name}</h6>
                                     <p className="card-text">{x.description}</p>
-                                    <a className="ml-1" href="#" onClick={(e) => this.onClickDeleteQuestion(e, x.id)} >Delete</a>
-                                    <NavLink to={c.editQuestionPath + "/" + x.id + "/global/" + this.state.currentSheet.id} className="ml-1" href="#" onClick={this.onClickStopPropagation}>Edit</NavLink>
+                                    {this.state.isAdmin ? (
+                                        <Fragment>
+                                            <a
+                                                className="ml-1"
+                                                href="#"
+                                                onClick={(e) => this.onClickDeleteQuestion(e, x.id)} >
+                                                Delete
+                                            </a>
+                                            <NavLink
+                                                to={c.editQuestionPath + "/" + x.id + "/global/" +
+                                                    this.state.currentSheet.id}
+                                                className="ml-1"
+                                                href="#"
+                                                onClick={this.onClickStopPropagation}>
+                                                Edit
+                                            </NavLink>
+                                        </Fragment>): null}
                                 </div>
                             </div>
                         </div>

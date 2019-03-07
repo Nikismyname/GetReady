@@ -17,6 +17,10 @@ export default function Register(props) {
         }
     }
 
+    function onClickGoBack(){
+        props.history.push(props.returnPath);
+    }
+
     //let fields = ["username", "password", "repeatPassword", "firstName", "lastName"];
     return (
         <BindingForm formName="Register Form" onSubmit={onClickRegister}>
@@ -26,6 +30,7 @@ export default function Register(props) {
             <input type="text" name="firstName" />
             <input type="text" name="lastName" />
             <button type="submit">Register</button>
+            <button type="button" onClick={onClickGoBack}>Back</button>
         </BindingForm>
     );
 }

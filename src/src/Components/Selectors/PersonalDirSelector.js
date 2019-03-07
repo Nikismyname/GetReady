@@ -35,7 +35,7 @@ export default class PersonalDirSelector extends Component {
     }
 
     async componentDidMount() {
-        let getAllResult = await PersonalDirSelector.questionSheetService.getallPersonal();
+        let getAllResult = await PersonalDirSelector.questionSheetService.getAllPersonal();
         if (getAllResult.status === 200) {
             let data = getAllResult.data;
             for (let i = 0; i < data.length; i++) {

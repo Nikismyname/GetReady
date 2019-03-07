@@ -44,6 +44,9 @@ export default class PesonalSheet extends Component {
 
     componentWillMount() {
         let id = this.props.match.params.id;
+        if (id == -1) {
+            id = this.props.savedId;
+        }
         this.navigateToSheet(id);
     }
 
@@ -52,9 +55,12 @@ export default class PesonalSheet extends Component {
             return;
         }
 
+        let newPath = c.personalQuestionSheetsPath + "/" + id;
+        this.props.setUserReturnId(id);
+
         let getResult = await PesonalSheet.questionSheetService.getPersonalIndex(id);
         if (getResult.status === 200) {
-            window.history.pushState(null, null, "/question-sheet/personal/" + id);
+            window.history.pushState(null, null, newPath);
             let data = getResult.data;
             this.parseIncomingSheetData(data);
         } else {

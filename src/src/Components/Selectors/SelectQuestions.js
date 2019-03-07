@@ -29,7 +29,7 @@ export default class SelectQuestions extends Component {
 
         let copyResult = await SelectQuestions.questionService.copyQuestions(data);
         if (copyResult.status === 200) {
-            this.props.history.push(c.personalQuestionSheetsPaths + "/" + id);
+            this.props.history.push(c.personalQuestionSheetsPath + "/" + id);
         } else {
             alert(copyResult.message)
         }
@@ -45,7 +45,10 @@ export default class SelectQuestions extends Component {
     render() {
         if (this.state.selectingQuestions) {
             return (
-                <QuestionPicker callBack={this.selectedQuestions} />
+                <QuestionPicker
+                    callBack={this.selectedQuestions}
+                    sheetId={this.props.match.params.sheetId}
+                />
             )
         } else {
             return (

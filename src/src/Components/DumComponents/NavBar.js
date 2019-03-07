@@ -69,10 +69,10 @@ export default function NavBar(props){
                             <li className="nav-item">
                                 <NavLink className="nav-link no-text-selection" to="/">Home</NavLink>
                             </li>
-                            {renderNavItem(c.globalQuestionSheetsPaths +
-                                "/0", "Public Questions", "none")}
-                            {renderNavItem(c.personalQuestionSheetsPaths +
-                                "/0", "Perspnal Questions", "user")}
+                            {renderNavItem(c.globalQuestionSheetsPath +
+                                "/-1", "Public Questions", "none")}
+                            {renderNavItem(c.personalQuestionSheetsPath +
+                                "/-1", "Perspnal Questions", "user")}
                             {renderNavItem("/tests", "Tests", "none")}
                         </ul>
                         <ul className="navbar-nav ml-auto">
@@ -81,6 +81,8 @@ export default function NavBar(props){
                                 localStorage.removeItem("user");
                                 props.history.push('/');
                                 props.setUser(null);
+                                props.setGlobalReturnId(0);
+                                props.setPersonalReturnId(0);
                             })}
                             {renderNavItem(c.loginPath, "Login", "none")}
                             {renderNavItem(c.registerPath, "Register", "none")}

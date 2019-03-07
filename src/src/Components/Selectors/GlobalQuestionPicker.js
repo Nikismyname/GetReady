@@ -32,7 +32,12 @@ export default class GlobalQuestionPicker extends Component {
     }
 
     async componentDidMount() {
+        let sheetId = Number(this.props.sheetId);
+        console.log("SHEET ID");
+        console.log(sheetId);
+
         let getAllResult = await GlobalQuestionPicker.questionSheetService.getAllGlobal();
+
         if (getAllResult.status === 200) {
             let data = getAllResult.data;
             for (let i = 0; i < data.length; i++) {
@@ -42,9 +47,27 @@ export default class GlobalQuestionPicker extends Component {
                 };
             };
 
+            let nonCollapsedIds = [];
+            console.log("DATA");
+            console.log(data);
+            let currentSheet = data.filter(x => x.id === sheetId)[0];
+            console.log("CURRENT SHEET");
+            console.log(currentSheet);
+            nonCollapsedIds.push(currentSheet.id);
+            while (true) {
+                if (currentSheet.questionSheetId === null) {
+                    break;
+                }
+                currentSheet = data.filter(x => x.id === currentSheet.questionSheetId)[0];
+                nonCollapsedIds.push(currentSheet.id);
+            }
+
+            let collapsedIds = data.map(x => x.id).filter(x=>!nonCollapsedIds.includes(x));
+
             this.setState(() => ({
                 sheets: data,
                 loaded: true,
+                collapsedIds,
             }));
         } else {
             alert(getAllResult.message);   

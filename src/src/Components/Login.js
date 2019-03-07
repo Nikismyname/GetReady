@@ -15,17 +15,22 @@ export default function Login(props) {
             localStorage.setItem("token", loginData.token);
             localStorage.setItem("user", JSON.stringify(loginData));
             props.setUser(loginData);
-            props.history.push('/');
+            onClickGoBack();
         } else {
             return loginResult;
         }
     };
+
+    function onClickGoBack(){
+        props.history.push(props.returnPath);
+    }
 
     return (
         <BindingForm formName="Login Form" onSubmit={onClickLogin}>
             <input type="text" name="username" />
             <input type="password" name="password" />
             <button type="submit">Login</button>
+            <button type="button" onClick={onClickGoBack}>Back</button>
         </BindingForm>
     )
 }

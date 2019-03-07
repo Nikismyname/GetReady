@@ -39,9 +39,27 @@ export default class App extends Component {
 
     this.state = {
       user: null,
+      loginRethurnPath: "/",
+      globalReturnId: 0,
+      personalRethurnId: 0,
     };
 
+    this.setGlobalReturnId = this.setGlobalReturnId.bind(this);
+    this.setPersonalReturnId = this.setPersonalReturnId.bind(this);
+    this.setloginReturnPath = this.setloginReturnPath.bind(this);
     this.setUser = this.setUser.bind(this);
+  }
+
+  setGlobalReturnId(id) {
+    this.setState({ globalReturnId: id });
+  }
+
+  setPersonalReturnId(id) {
+    this.setState({ personalRethurnId: id });
+  }
+
+  setloginReturnPath(path) {
+    this.setState({ loginRethurnPath: path });
   }
 
   setUser(val) {
@@ -60,44 +78,106 @@ export default class App extends Component {
     const App = (
       <BrowserRouter>
         <div className="pageContent">
-          <Route render={(props) => <NavBar {...props} user={this.state.user} setUser={this.setUser} />} />
+
+          <Route render={(props) =>
+            <NavBar
+              {...props}
+              user={this.state.user}
+              setUser={this.setUser}
+              setPersonalReturnId={this.setPersonalReturnId}
+              setGlobalReturnId={this.setGlobalReturnId}
+            />
+          }/>
+
           <div className="container p-0">
             <Switch>
+
+              {/*GlobalSheets*/}
+              <Route exact path={c.globalQuestionSheetsPath + "/:id"}
+                render={(props) =>
+                  <GlobalSheets
+                    {...props}
+                    user={this.state.user}
+                    setUserReturnId={this.setGlobalReturnId}
+                    setLoginReturnPath={this.setloginReturnPath}
+                    savedId={this.state.globalReturnId}
+                  />
+                }
+              />
+
+              {/*PersonalSheets*/}
+              <Route exact path={c.personalQuestionSheetsPath + "/:id"}
+                render={(props) =>
+                  <PersonalSheets
+                    {...props}
+                    setUserReturnId={this.setPersonalReturnId}
+                    savedId={this.state.personalRethurnId}
+                  />
+                }
+              />
+
+              {/*Register*/}
+              <Route exact path={c.registerPath}
+                render={(props) =>
+                  <Register
+                    {...props}
+                    setUser={this.setUser}
+                    returnPath={this.state.loginRethurnPath}
+                  />
+                }
+              />
+
+              {/*Login*/}
+              <Route exact path={c.loginPath}
+                render={(props) =>
+                  <Login
+                    {...props}
+                    setUser={this.setUser}
+                    returnPath={this.state.loginRethurnPath}
+                  />
+                }
+              />
+
+              {/*Create Question Sheet*/}
               <Route exact path={c.createGlobalSheetPath + "/:id/:scope"}
                 component={CreateQuestionSheet} />
 
-              <Route exact path={c.globalQuestionSheetsPaths + "/:id"}
-                component={GlobalSheets} />
-
-              <Route exact path={c.personalQuestionSheetsPaths + "/:id"}
-                component={PersonalSheets} />
-
-              {/*WithDataAndPR*/}<Route exact path={c.viewGlobalQuestion + "/:id/:sheetId"}
+              {/*View Global Question*/}
+              {/*I*/}<Route exact path={c.viewGlobalQuestion + "/:id/:sheetId"}
                 component={ViewGlobalQuestionWithInitialData} />
 
+              {/*Create Question*/}
               <Route exact path={c.createQuestionPath + "/:id/:scope"}
                 render={(props) => <CreateQuestion {...props} isInternal={false} />} />
 
-              <Route exact path={c.registerPath}
-                render={(props) => <Register {...props} setUser={this.setUser} />} />
+              {/*Copy Questions*/}
+              <Route exact path={c.copyQuestionsPath+"/:sheetId"} component={CopyQuestion} />
 
-              <Route exact path={c.loginPath}
-                render={(props) => <Login {...props} setUser={this.setUser} />} />
-
-              <Route exact path={c.copyQuestionsPath} component={CopyQuestion} />
-
+              {/*Test*/}
               <Route exact path={c.testPath + "/:id"} component={Test} />
 
+              {/*Edit Question*/}
               <Route exact path={c.editQuestionPath + "/:id/:scope/:sheetId"}
                 component={EditQuestion} />
-              
+
+              {/*Edit Question Sheet*/}
               <Route exact path={c.editQuestionSheetPath + "/:id/:scope/:sheetId"}
                 component={EditSheet} />
 
+              {/*Home*/}
               <Route exact path="/"
-                render={(props) => <Home {...props} user={this.state.user} />} />
+                render={(props) =>
+                  <Home
+                    {...props}
+                    user={this.state.user}
+                    setLoginReturnPath={this.setloginReturnPath}
+                  />
+                }
+              />
 
-              <Route exact path="/tests" component={Tests}/>
+              {/*Test Area*/}
+              <Route exact path="/tests" component={Tests} />
+
             </Switch>
           </div>
         </div>

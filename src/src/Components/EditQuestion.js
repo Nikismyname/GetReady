@@ -54,9 +54,9 @@ export default class EditQuestion extends Component {
 
         if (editResult.status === 200) {
             if (this.state.isGlobal) {
-                this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.sheetId);
+                this.props.history.push(c.globalQuestionSheetsPath + "/" + this.props.match.params.sheetId);
             } else {
-                this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.sheetId);
+                this.props.history.push(c.personalQuestionSheetsPath + "/" + this.props.match.params.sheetId);
             }
         } else {
             return editResult;
@@ -65,9 +65,9 @@ export default class EditQuestion extends Component {
 
     onClickBack() {
         if (this.state.isGlobal) {
-            this.props.history.push(c.globalQuestionSheetsPaths + "/" + this.props.match.params.sheetId);
+            this.props.history.push(c.globalQuestionSheetsPath + "/" + this.props.match.params.sheetId);
         } else {
-            this.props.history.push(c.personalQuestionSheetsPaths + "/" + this.props.match.params.sheetId);
+            this.props.history.push(c.personalQuestionSheetsPath + "/" + this.props.match.params.sheetId);
         }
     }
 

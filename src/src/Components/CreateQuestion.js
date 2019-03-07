@@ -15,9 +15,9 @@ export default function CreateQuestion(props) {
         let isGlobal = scope === "global" ? true : false;
         if (createResult.status === 200) {
             if (isGlobal) {
-                props.history.push(c.globalQuestionSheetsPaths + "/" + props.match.params.id);
+                props.history.push(c.globalQuestionSheetsPath + "/" + props.match.params.id);
             } else {
-                props.history.push(c.personalQuestionSheetsPaths + "/" + props.match.params.id);
+                props.history.push(c.personalQuestionSheetsPath + "/" + props.match.params.id);
             }
         } else {
             return createResult;
@@ -28,9 +28,9 @@ export default function CreateQuestion(props) {
         let scope = props.match.params.scope;
         let isGlobal = scope === "global" ? true : false;
         if (isGlobal) {
-            props.history.push(c.globalQuestionSheetsPaths + "/" + props.match.params.id);
+            props.history.push(c.globalQuestionSheetsPath + "/" + props.match.params.id);
         } else {
-            props.history.push(c.personalQuestionSheetsPaths + "/" + props.match.params.id);
+            props.history.push(c.personalQuestionSheetsPath + "/" + props.match.params.id);
         }
     }
 
