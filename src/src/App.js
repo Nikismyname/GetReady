@@ -18,8 +18,9 @@ import PersonalSheets from "./Components/PersonalSheets";
 import CopyQuestion from "./Components/Selectors/SelectQuestions";
 import Test from "./Components/Test/Test";
 import EditQuestion from "./Components/EditQuestion";
-import Tests from "./Tests/TestInlineCode";
 import EditSheet from "./Components/EditSheet";
+import NotFound from "./Components/DumComponents/NotFound";
+import Tests from "./Tests/TestInlineCode";
 
 import './css/bootstrap-slate-4-1-3.css';
 import "./css/app.css";
@@ -62,8 +63,8 @@ export default class App extends Component {
     this.setState({ loginRethurnPath: path });
   }
 
-  setUser(val) {
-    this.setState(() => ({ user: val }));
+  setUser(user) {
+    this.setState(() => ({ user }));
   }
 
   componentDidMount() {
@@ -154,7 +155,12 @@ export default class App extends Component {
               <Route exact path={c.copyQuestionsPath+"/:sheetId"} component={CopyQuestion} />
 
               {/*Test*/}
-              <Route exact path={c.testPath + "/:id"} component={Test} />
+              <Route exact path={c.testPath + "/:id/:mode"} render={(props) =>
+                <Test
+                  {...props}
+                  returnId={this.state.personalRethurnId}
+                />
+              } />
 
               {/*Edit Question*/}
               <Route exact path={c.editQuestionPath + "/:id/:scope/:sheetId"}
@@ -176,7 +182,9 @@ export default class App extends Component {
               />
 
               {/*Test Area*/}
-              <Route exact path="/tests" component={Tests} />
+              {/* <Route exact path="/tests" component={Tests} /> */}
+
+              <Route component={NotFound} />
 
             </Switch>
           </div>

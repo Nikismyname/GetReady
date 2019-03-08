@@ -83,8 +83,22 @@ export default class QuestionServieces {
         }
     }
 
+    async addNewScore(score, questionId) {
+        let data = {
+            score,
+            questionId,
+        };
+
+        try {
+            let result = await post("Question/AddNewScore", data);
+            return result;
+        } catch (err) {
+            this.handleError(err);
+        }
+    }
+
     handleError(err) {
-        console.log(err);
+        console.log("SERVICE ERROR: "+err);
     }
 }
 

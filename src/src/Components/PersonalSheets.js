@@ -133,8 +133,7 @@ export default class PesonalSheet extends Component {
     }
 
     onClickViewQuestion(ind) {
-        return;
-        this.props.history.push(c.viewGlobalQuestion + "/" + ind + "/" + this.state.currentSheet.id);
+        this.props.history.push(c.testPath + "/" + ind + "/single");
     }
 
     async onSaveOrdering(orders) {
@@ -192,7 +191,7 @@ export default class PesonalSheet extends Component {
                     </div>
                     <div data-tip="">
                         <NavLink
-                            to={c.testPath + "/" + this.state.currentSheet.id}
+                            to={c.testPath + "/" + this.state.currentSheet.id + "/multiple"}
                             onClick={e => e.stopPropagation()} >
                             Start Test
                         </NavLink>

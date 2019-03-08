@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 import * as c from "../../Utilities/Constants";
 import ShowError from "../../Utilities/ShowError";
+import { ToastContainer } from "react-toastr";
 
 const lableClases = "col-sm-3 col-form-label text-right";
 const inputColumns = "col-sm-9";
@@ -16,8 +17,8 @@ export default class BindingForm extends Component {
             ...this.defineInitialState()
         }
 
-        console.log("STATE");
-        console.log(this.state);
+        ///Toastr Container ref 
+        this.container = {};
 
         this.handleCHange = this.handleCHange.bind(this);
         this.defineInitialState = this.defineInitialState.bind(this);
@@ -43,16 +44,19 @@ export default class BindingForm extends Component {
             if (response.message.errors) {
                 this.handeleValidationErrors(response.message.errors);
             } else if (typeof response.message === "string") {
-                alert(response.message);
+                this.container.error
+                    (
+                        response.message, "Error", { autoClose: 5000, closeButton: true }
+                    );
             }
         }
     }
 
     handeleValidationErrors(errors) {
         let newERRORS = this.state.ERRORS;
-    
+
         for (let [propName, errorMesages] of Object.entries(errors)) {
-    
+
             let capitalPropName = propName.toUpperCase();
             let existingError = newERRORS.filter(x => x.fieldName == capitalPropName);
             if (existingError.length > 1) {
@@ -125,22 +129,22 @@ export default class BindingForm extends Component {
             if (child.type === "input" || child.type.name === "ExpandingTextarea") {
                 return (
                     <Fragment>
-                    <ShowError prop={child.props.name} ERRORS={this.state.ERRORS} />
-                    <div className="row">
-                        <label className={lableClases}>{this.fixLabelText(child.props.name)}</label>
-                        <div className={inputColumns}>
-                            {React.cloneElement(child,
-                                {
-                                    ...child.props,
-                                    style: {overflow: "hidden", backgroundColor: c.secondaryColor},
-                                    className: "form-control-black mb-4",
-                                    onChange: this.handleCHange,
-                                    value: this.state[child.props.name]
-                                })
-                            }
+                        <ShowError prop={child.props.name} ERRORS={this.state.ERRORS} />
+                        <div className="row">
+                            <label className={lableClases}>{this.fixLabelText(child.props.name)}</label>
+                            <div className={inputColumns}>
+                                {React.cloneElement(child,
+                                    {
+                                        ...child.props,
+                                        style: { overflow: "hidden", backgroundColor: c.secondaryColor },
+                                        className: "form-control-black mb-4",
+                                        onChange: this.handleCHange,
+                                        value: this.state[child.props.name]
+                                    })
+                                }
+                            </div>
                         </div>
-                        </div>
-                        </Fragment>
+                    </Fragment>
                 )
             } else if (child.type === "button") {
                 return null;
@@ -204,6 +208,10 @@ export default class BindingForm extends Component {
     App() {
         return (
             <Fragment>
+                <ToastContainer
+                    ref={ref => this.container = ref}
+                    className="toast-top-right"
+                />
                 <div className="row">
                     <div className="col-8">
                         <div className="row">
@@ -215,7 +223,7 @@ export default class BindingForm extends Component {
                             {this.renderForm()}
                         </form>
                     </div>
-                    <div className="col-4" style={{marginTop: "5em"}}>
+                    <div className="col-4" style={{ marginTop: "5em" }}>
                         {this.renderFormattingMap()}
                     </div>
                 </div>

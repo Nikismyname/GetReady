@@ -73,16 +73,16 @@ export default function NavBar(props){
                                 "/-1", "Public Questions", "none")}
                             {renderNavItem(c.personalQuestionSheetsPath +
                                 "/-1", "Perspnal Questions", "user")}
-                            {renderNavItem("/tests", "Tests", "none")}
+                            {/*renderNavItem("/tests", "Tests", "none")*/}
                         </ul>
                         <ul className="navbar-nav ml-auto">
                             {renderNavItem("#", "Logout", "user", () => {
                                 localStorage.removeItem("token");
                                 localStorage.removeItem("user");
-                                props.history.push('/');
                                 props.setUser(null);
                                 props.setGlobalReturnId(0);
                                 props.setPersonalReturnId(0);
+                                props.history.push('/');
                             })}
                             {renderNavItem(c.loginPath, "Login", "none")}
                             {renderNavItem(c.registerPath, "Register", "none")}

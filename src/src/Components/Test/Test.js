@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Question from "./Question";
 import QuestionService from "../../Services/QuestionService";
 import QuestionSheetService from "../../Services/QuestionSheetService";
+import * as c from "../../Utilities/Constants";
 
 export default class Test extends Component {
     static questionService = new QuestionService();
@@ -14,6 +15,7 @@ export default class Test extends Component {
             questionIds: [],
             question: {},
             loaded: false,
+            isSingle: this.props.match.params.mode === "single"? true : false,
         };
 
         this.index = 0;
@@ -24,12 +26,16 @@ export default class Test extends Component {
     }
 
     async componentDidMount() {
-        let getIdsResult = await Test.questionSheetService.getIdsForSheet(this.props.match.params.id);
-        if (getIdsResult.status === 200) {
-            this.setState({
-                questionIds: getIdsResult.data,
-            });
-            this.fetchQuestion(this.state.questionIds[0]);
+        if (this.state.isSingle) {
+            this.fetchQuestion(this.props.match.params.id);
+        } else {
+            let getIdsResult = await Test.questionSheetService.getIdsForSheet(this.props.match.params.id);
+            if (getIdsResult.status === 200) {
+                this.setState({
+                    questionIds: getIdsResult.data,
+                });
+                this.fetchQuestion(this.state.questionIds[0]);
+            }
         }
     }
 
@@ -45,20 +51,36 @@ export default class Test extends Component {
         }
     }
 
-    onCallBackQuestionAnswered() {
-        console.log("HERE: " + this.index);
-        this.index += 1;
-        console.log("HERE: " + this.index);
-        
-        if (this.index >= this.state.questionIds.length) {
-            this.props.history.push("/");
+    onCallBackQuestionAnswered(score) {
+        if (score != -1) {
+            let id;
+            if (this.state.isSingle) {
+                id = this.props.match.params.id;
+            } else {
+                id = this.state.questionIds[this.index];
+            }
+            Test.questionService.addNewScore(score, id);
+        }
+
+        if (this.state.isSingle) {
+            this.props.history.push(c.personalQuestionSheetsPath+"/"+ this.props.returnId);
         } else {
-            this.fetchQuestion(this.state.questionIds[this.index]);
+            this.index += 1;
+        
+            if (this.index >= this.state.questionIds.length) {
+                this.props.history.push(c.personalQuestionSheetsPath+"/"+ this.props.returnId);
+            } else {
+                this.fetchQuestion(this.state.questionIds[this.index]);
+            }
         }
     }
 
     App() {
-        return <Question question={this.state.question} callBack={this.onCallBackQuestionAnswered} />;
+        return <Question
+            isSingle={this.state.isSingle}
+            question={this.state.question}
+            callBack={this.onCallBackQuestionAnswered}
+        />;
     }
 
     render() {

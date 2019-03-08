@@ -3,15 +3,19 @@ import * as c from "../../Utilities/Constants";
 import { formatText } from "../../Utilities/QuestionFunctions";
 import Textarea from "react-expanding-textarea";
 import withPrettyPrint from "../../HOC/WithPrettyPrint";
+import StarRatings from 'react-star-ratings';
+
 import "../../css/desert.css";
 
 class Question extends Component {
+    ///PROPS: question, callBack
     constructor(props) {
         super(props);
-        console.log("Question Constructor, question: "+ JSON.stringify(this.props.question));
+        console.log("Question Constructor, question: " + JSON.stringify(this.props.question));
         this.state = {
             showComment: false,
             showAnswer: false,
+            rating: -1,
         };
 
         this.App = this.App.bind(this);
@@ -19,6 +23,7 @@ class Question extends Component {
         this.onClickShowComment = this.onClickShowComment.bind(this);
         this.onClickShowAnswer = this.onClickShowAnswer.bind(this);
         this.onClickNextQuestion = this.onClickNextQuestion.bind(this);
+        this.changeRating = this.changeRating.bind(this);
     }
 
     onClickShowAnswer() {
@@ -30,7 +35,7 @@ class Question extends Component {
     }
 
     onClickNextQuestion() {
-        this.props.callBack();
+        this.props.callBack(this.state.rating);
     }
 
     renderAnswerInput() {
@@ -66,7 +71,7 @@ class Question extends Component {
                     <button
                         onClick={this.onClickNextQuestion}
                         className="btn btn-primary btn-block">
-                        Next Question
+                        {this.props.isSingle? "Done":"Next Question"}
                     </button>
                 </div>
             </div>
@@ -106,6 +111,7 @@ class Question extends Component {
                 <Fragment>
                     <h1>Answer</h1>
                     {renderedText}
+                    {this.renderStarRating()}
                 </Fragment>
             )
         } else {
@@ -113,9 +119,33 @@ class Question extends Component {
         }
     }
 
+    changeRating(newRating, name) {
+        this.setState({
+            rating: newRating
+        });
+    }
+
+    renderStarRating() {
+        return (
+            <Fragment>
+                <div className="mt-2">
+                <h1>Rate Your Answer</h1>
+                    <StarRatings
+                        rating={this.state.rating}
+                        starRatedColor="blue"
+                        changeRating={this.changeRating}
+                        numberOfStars={10}
+                        name='rating'
+                    />
+                </div>
+            </Fragment>
+        )
+    }
+
     App() {
         return (
             <Fragment>
+                {this.props.question.lastTenScores}
                 {this.renderQuestion(this.props.question.question)}
                 {this.renderAnswerInput()}
                 {this.renderComment(this.props.question.comment)}
