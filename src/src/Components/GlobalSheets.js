@@ -14,12 +14,14 @@ export default class GlobalSheets extends Component {
         super(props);
 
         let isAdmin = this.props.user ? this.props.user.role === "Admin" ? true : false : false;
+        let isUser = this.props.user ? true : false;
 
         this.state = {
             currentSheet: {}, //id: 1, children: [], description: "", difficulty: 1, globalQuestions: []
             //importance: 10, name: "", order: 1, questionSheetId: null/1  
             loaded: false,
             isAdmin,
+            isUser,
         };
 
         this.renderCurrentSheet = this.renderCurrentSheet.bind(this);
@@ -47,7 +49,7 @@ export default class GlobalSheets extends Component {
             return;
         }
 
-        let newPath = c.globalQuestionSheetsPath +"/"+id;
+        let newPath = c.globalQuestionSheetsPath + "/" + id;
         this.props.setLoginReturnPath(newPath);
         this.props.setUserReturnId(id);
 
@@ -128,14 +130,16 @@ export default class GlobalSheets extends Component {
                             </Fragment>
                         ) : null
                     }
-
-                    <div data-tip="">
-                        <NavLink
-                            to={c.copyQuestionsPath+"/"+ this.state.currentSheet.id}
-                            onClick={e => e.stopPropagation()}>
-                            Copy Questions
-                        </NavLink>
-                    </div>
+                    {this.state.isUser ? (
+                        <div data-tip="">
+                            <NavLink
+                                to={c.copyQuestionsPath + "/" + this.state.currentSheet.id}
+                                onClick={e => e.stopPropagation()}>
+                                Copy Questions
+                            </NavLink>
+                        </div>
+                    ) : null
+                    }
                 </div>
             </div>
         )
@@ -205,7 +209,7 @@ export default class GlobalSheets extends Component {
                                                 onClick={this.onClickStopPropagation}>
                                                 Edit
                                             </NavLink>
-                                        </Fragment>): null}
+                                        </Fragment>) : null}
                                 </div>
                             </div>
                         </div>

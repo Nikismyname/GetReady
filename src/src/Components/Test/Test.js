@@ -15,7 +15,7 @@ export default class Test extends Component {
             questionIds: [],
             question: {},
             loaded: false,
-            isSingle: this.props.match.params.mode === "single"? true : false,
+            isSingle: this.props.match.params.mode === "single" ? true : false,
         };
 
         this.index = 0;
@@ -51,8 +51,8 @@ export default class Test extends Component {
         }
     }
 
-    onCallBackQuestionAnswered(score) {
-        if (score != -1) {
+    onCallBackQuestionAnswered(score, isNext) {
+        if (score != -1 && isNext) {
             let id;
             if (this.state.isSingle) {
                 id = this.props.match.params.id;
@@ -62,14 +62,22 @@ export default class Test extends Component {
             Test.questionService.addNewScore(score, id);
         }
 
-        if (this.state.isSingle) {
-            this.props.history.push(c.personalQuestionSheetsPath+"/"+ this.props.returnId);
-        } else {
-            this.index += 1;
-        
-            if (this.index >= this.state.questionIds.length) {
-                this.props.history.push(c.personalQuestionSheetsPath+"/"+ this.props.returnId);
+        if (isNext) {
+            if (this.state.isSingle) {
+                this.props.history.push(c.personalQuestionSheetsPath + "/" + this.props.returnId);
             } else {
+                this.index += 1;
+
+                if (this.index >= this.state.questionIds.length) {
+                    this.props.history.push(c.personalQuestionSheetsPath + "/" + this.props.returnId);
+                } else {
+                    this.fetchQuestion(this.state.questionIds[this.index]);
+                }
+            }
+        } else {
+            /// not single
+            if (this.index > 0) {
+                this.index -= 1;
                 this.fetchQuestion(this.state.questionIds[this.index]);
             }
         }
@@ -80,6 +88,7 @@ export default class Test extends Component {
             isSingle={this.state.isSingle}
             question={this.state.question}
             callBack={this.onCallBackQuestionAnswered}
+            _history={this.props.history}
         />;
     }
 

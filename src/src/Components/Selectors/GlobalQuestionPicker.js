@@ -1,5 +1,4 @@
 import React, { Component, Fragment } from "react";
-import "../../css/personal-dir-selector.css";
 import QuestionSheetService from "../../Services/QuestionSheetService";
 
 export default class GlobalQuestionPicker extends Component {

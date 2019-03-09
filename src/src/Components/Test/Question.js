@@ -3,9 +3,11 @@ import * as c from "../../Utilities/Constants";
 import { formatText } from "../../Utilities/QuestionFunctions";
 import Textarea from "react-expanding-textarea";
 import withPrettyPrint from "../../HOC/WithPrettyPrint";
-import StarRatings from 'react-star-ratings';
+import StarRatings from "react-star-ratings";
+import FixedButtons from "../BindingForm/FixedButtons"; 
 
 import "../../css/desert.css";
+import "../../css/personal-dir-selector.css"
 
 class Question extends Component {
     ///PROPS: question, callBack
@@ -34,9 +36,11 @@ class Question extends Component {
         this.setState({ showComment: !this.state.showComment });
     }
 
-    onClickNextQuestion() {
-        this.props.callBack(this.state.rating);
+    onClickNextQuestion(isNext = true) {
+        this.props.callBack(this.state.rating, isNext);
+        this.setState({showAnswer: false, showComment: false});
     }
+    
 
     renderAnswerInput() {
         return (
@@ -52,29 +56,56 @@ class Question extends Component {
 
     renderControls() {
         return (
-            <div className="row mt-4 mb-4">
-                <div className="col-2">
+            <FixedButtons>
+                <button onClick={this.onClickShowComment}>Show Comment</button>
+                <button onClick={this.onClickShowAnswer}>Show Answer</button>
+                {this.props.isSingle ? <div></div> :
+                    <button onClick={()=>this.onClickNextQuestion(false)}> Previous</button>}
+                <button onClick={this.onClickNextQuestion}>{this.props.isSingle ? "Done" : "Next"}</button>
+                {!this.props.isSingle ?
                     <button
-                        onClick={this.onClickShowComment}
-                        className="btn btn-primary btn-block">
-                        Show Comment
-                    </button>
-                </div>
-                <div className="col-2">
-                    <button
-                        onClick={this.onClickShowAnswer}
-                        className="btn btn-primary btn-block">
-                        Show Answer
-                    </button>
-                </div>
-                <div className="col-2">
-                    <button
-                        onClick={this.onClickNextQuestion}
-                        className="btn btn-primary btn-block">
-                        {this.props.isSingle? "Done":"Next Question"}
-                    </button>
-                </div>
-            </div>
+                        onClick={()=> this.props._history.push(c.personalQuestionSheetsPath + "/-1")}>
+                        Back
+                    </button> : <div></div>
+                }
+                    
+            </FixedButtons>
+            // <Fragment>
+            //     <div className="row mt-4 mb-4 bottom-fixed container">
+            //         <div className="col-2 pl-0">
+            //             <button
+            //                 onClick={this.onClickShowComment}
+            //                 className="btn btn-primary btn-block">
+            //                 Show Comment
+            //             </button>
+            //         </div>
+            //         <div className="col-2">
+            //             <button
+            //                 onClick={this.onClickShowAnswer}
+            //                 className="btn btn-primary btn-block">
+            //                 Show Answer
+            //             </button>
+            //         </div>
+            //         {this.props.isSingle? null :
+            //             <div className="col-2 ">
+            //                 <button
+            //                     onClick={()=>this.onClickNextQuestion(false)}
+            //                     className="btn btn-primary btn-block">
+            //                     Previous
+            //                 </button>
+            //             </div>
+            //         }
+            //         <div className="col-2 ">
+            //             <button
+            //                 onClick={this.onClickNextQuestion}
+            //                 className="btn btn-primary btn-block">
+            //                 {this.props.isSingle? "Done":"Next"}
+            //             </button>
+            //         </div>
+            //     </div>
+            //     <div className="pb-5 pb-5"></div>
+            //     <div className="pb-5 pb-5"></div>
+            // </Fragment>
         )
     }
 

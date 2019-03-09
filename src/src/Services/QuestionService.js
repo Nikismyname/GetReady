@@ -28,9 +28,18 @@ export default class QuestionServieces {
 
     async deletePersonal(id) {
         try { 
-            let result = await post("Question/DeletePersonal", id, true);
+            let result = await post("Question/DeletePersonal", id);
             return result;
         } catch (err) {
+            this.handleError(err);
+        }
+    }
+
+    async deleteAllPersonalForSheet(id) {
+        try {
+            let result = await post("Question/DeleteAllPersonalForSheet", id);
+            return result;
+        } catch(err){
             this.handleError(err);
         }
     }

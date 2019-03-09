@@ -88,7 +88,7 @@ export function renderDroppable(items, name) {
     </Droppable>
 }
 
-export async function extOnDragEnd (result, _this, collections, saveReorderings){
+export async function extOnDragEnd (result, _this, collections, saveReorderings, orderColumns){
     const { source, destination } = result;
 
     // dropped outside the list
@@ -119,6 +119,10 @@ export async function extOnDragEnd (result, _this, collections, saveReorderings)
 
         await _this.setState(state);
     }
+
+    let [col1, col2, col3] = orderColumns(_this.state.col1, _this.state.col2, _this.state.col3);
+
+    await _this.setState({col1, col2, col3});
 
     let orderings = [];
 

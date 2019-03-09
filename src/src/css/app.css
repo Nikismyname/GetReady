@@ -4,6 +4,13 @@
     bottom: 1em;
 } 
 
+.bottom-fixed{
+  bottom: 0;
+  position: fixed;
+  z-index: 3000;
+  width:inherit;
+}
+
 .icon {
     position: relative;
     bottom: 3px;

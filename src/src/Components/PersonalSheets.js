@@ -9,7 +9,7 @@ import QuestionService from "../Services/QuestionService";
 
 const borderString = "3px solid rgba(0, 0, 0, 0.6)";
 
-export default class PesonalSheet extends Component {
+export default class PersonalSheet extends Component {
     static questionSheetService = new QuestionSheetService();
     static questionService = new QuestionService();
 
@@ -32,6 +32,10 @@ export default class PesonalSheet extends Component {
 
         this.onClickDeleteQuestion = this.onClickDeleteQuestion.bind(this);
         this.onClickViewQuestion = this.onClickViewQuestion.bind(this);
+        this.onClickDeleteAllQuestions = this.onClickDeleteAllQuestions.bind(this);
+
+        this.orderInitialColumns = this.orderInitialColumns.bind(this);
+        this.orderColumns = this.orderColumns.bind(this);
 
         this.onSaveOrdering = this.onSaveOrdering.bind(this);
 
@@ -58,7 +62,7 @@ export default class PesonalSheet extends Component {
         let newPath = c.personalQuestionSheetsPath + "/" + id;
         this.props.setUserReturnId(id);
 
-        let getResult = await PesonalSheet.questionSheetService.getPersonalIndex(id);
+        let getResult = await PersonalSheet.questionSheetService.getPersonalIndex(id);
         if (getResult.status === 200) {
             window.history.pushState(null, null, newPath);
             let data = getResult.data;
@@ -70,46 +74,101 @@ export default class PesonalSheet extends Component {
 
     parseIncomingSheetData(data) {
         let state = this.state;
-            state.currentSheet = data;
-            state.loaded = true;
-            state.col1 = [];
-            state.col2 = [];
-            state.col3 = [];
-            for (let i = 0; i < data.personalQuestions.length; i++) {
-                let question = data.personalQuestions[i];
-                switch (question.column) {
-                    case 1:
-                        state.col1.push(question);
-                        break;
-                    case 2:
-                        state.col2.push(question);
-                        break;
-                    case 3:
-                        state.col3.push(question);
-                        break;
-                    default:
-                        state.col1.push(question);
-                        break;
-                }
+        state.currentSheet = data;
+        state.loaded = true;
+
+        let questions = data.personalQuestions;
+
+        let columns = this.orderInitialColumns(questions);
+        this.setState(() => ({
+            currentSheet: data,
+            loaded: true,
+            col1: columns[0],
+            col2: columns[1],
+            col3: columns[2],
+        }));
+    }
+
+    orderInitialColumns(questions) { 
+        let unassigned = [];
+        let col1 = [];
+        let col2 = [];
+        let col3 = [];
+
+        for (let i = 0; i < questions.length; i++){
+            let question = questions[i];
+            switch (question.column) {
+                case 1:
+                    col1.push(question);
+                    break;
+                case 2:
+                    col2.push(question);
+                    break;
+                case 3:
+                    col3.push(question);
+                    break;
+                default:
+                    unassigned.push(question);
+                    break;
+            }
+        };
+
+        col1 = col1.sort((a, b) => a.order - b.order);
+        col2 = col2.sort((a, b) => a.order - b.order);
+        col3 = col3.sort((a, b) => a.order - b.order);
+
+        if (unassigned.length === 0) {
+            //console.log("Orderings From Db!");
+            return [col1, col2, col3]
+        } else {
+            return this.orderColumns(col1, col2, col3, unassigned) ;
+        }
+    }
+
+    orderColumns(col1, col2, col3, unassigned = []) {
+        let all = [...col1, ...col2, ...col3, ...unassigned];
+        col1 = col2 = col3 = [];
+        let allLenght = all.length;
+        let remainder = allLenght % 3;
+        let solidColumnLenght = (allLenght - remainder) / 3;
+        let columnOneHasOneExtra = remainder >= 1;
+        let columnTwoHasOneExtra = remainder >= 2;
+        let columnOneLenght = solidColumnLenght + (columnOneHasOneExtra ? 1 : 0);
+        col1 = all.slice(0, columnOneLenght);
+        let columnThoLenght = solidColumnLenght + (columnTwoHasOneExtra ? 1 : 0);
+        col2 = all.slice(columnOneLenght, columnOneLenght + columnThoLenght);
+        col3 = all.slice(columnOneLenght + columnThoLenght);
+
+
+        let columns = [col1, col2, col3];
+
+        let orderings = [];
+
+        for (let i = 0; i < columns.length; i++) {
+            let column = columns[i];
+    
+            for (let j = 0; j < column.length; j++) {
+                let q = column[j];
+                orderings.push([q.id, j, i+1]);
             };
+        };
 
-            state.col1 = state.col1.sort((a, b) => a.order - b.order);
-            state.col2 = state.col2.sort((a, b) => a.order - b.order);
-            state.col3 = state.col3.sort((a, b) => a.order - b.order);
+        this.onSaveOrdering(orderings);
 
-            this.setState(() => (state));   
+        return columns;
     }
 
     renderQuestions(questions) {
         return questions.map(question => (
-            { item: (
-                < QuestionView
-                    q = { question }
-                    sheetId = { this.state.currentSheet.id }
-                    onClickBody = { this.onClickViewQuestion }
-                    onClickDelete = { this.onClickDeleteQuestion }
-                />
-            ),
+            {
+                item: (
+                    < QuestionView
+                        q={question}
+                        sheetId={this.state.currentSheet.id}
+                        onClickBody={this.onClickViewQuestion}
+                        onClickDelete={this.onClickDeleteQuestion}
+                    />
+                ),
                 id: question.id
             }
         ));
@@ -119,14 +178,17 @@ export default class PesonalSheet extends Component {
         e.preventDefault();
         e.stopPropagation();
 
-        let deleteResult = await PesonalSheet.questionService.deletePersonal(id);
+        let deleteResult = await PersonalSheet.questionService.deletePersonal(id);
 
         if (deleteResult.status === 200) {
             let newState = this.state;
             newState.col1 = newState.col1.filter(x => x.id !== id);
             newState.col2 = newState.col2.filter(x => x.id !== id);
             newState.col3 = newState.col3.filter(x => x.id !== id);
-            this.setState(newState);
+            let [col1, col2, col3] = this.orderColumns(newState.col1,newState.col2,newState.col3);
+            this.setState({
+                col1,col2,col3,
+            });
         } else {
             alert("Delete did not work!");
         }
@@ -136,26 +198,43 @@ export default class PesonalSheet extends Component {
         this.props.history.push(c.testPath + "/" + ind + "/single");
     }
 
+    async onClickDeleteAllQuestions(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        let delResult = await PersonalSheet.questionService
+            .deleteAllPersonalForSheet(this.state.currentSheet.id);
+        
+        if (delResult.status === 200) {
+            this.setState({
+                col1: [],
+                col2: [],
+                col3: [],
+            });
+        } else {
+            alert(delResult.message)
+        }
+    }
+
     async onSaveOrdering(orders) {
         let data = {
             sheetId: this.state.currentSheet.id,
             orderings: orders,
         };
 
-        let reorderResult = await PesonalSheet.questionService.reorder(data);
+        let reorderResult = await PersonalSheet.questionService.reorder(data);
         if (reorderResult.status === 200) {
             console.log("Ordering worked!");
         } else {
-            alert("Reorder did not work!")
+            alert("Ordering did not work!")
         }
     }
 
-    ///TODO: Why delete Blobal Here??
     async onClickDeleteChild(e, id) {
         e.preventDefault();
         e.stopPropagation();
 
-        let deleteResult = await PesonalSheet.questionSheetService.deletePersonal(id);
+        let deleteResult = await PersonalSheet.questionSheetService.deletePersonal(id);
         if (deleteResult.status === 200) {
             let newState = this.state;
             newState.currentSheet.children = newState.currentSheet.children.filter(x => x.id !== id);
@@ -196,6 +275,9 @@ export default class PesonalSheet extends Component {
                             Start Test
                         </NavLink>
                     </div>
+                    <div data-tip="">
+                        <a href="#" onClick={this.onClickDeleteAllQuestions}>Delete All Questions</a>
+                    </div>
                 </div>
             </div>
         )
@@ -213,8 +295,8 @@ export default class PesonalSheet extends Component {
                     <a href="#" onClick={(e) => this.onClickDeleteChild(e, x.id)}>Delete</a>
                     <NavLink
                         className="ml-2"
-                        to={c.editQuestionSheetPath + "/" + x.id+"/personal/"+ this.state.currentSheet.id}
-                        onClick={e=> e.stopPropagation()}>
+                        to={c.editQuestionSheetPath + "/" + x.id + "/personal/" + this.state.currentSheet.id}
+                        onClick={e => e.stopPropagation()}>
                         Edit
                     </NavLink>
                 </div>
@@ -224,7 +306,7 @@ export default class PesonalSheet extends Component {
 
     renderTestLists() {
         return (
-            <DragDropContext onDragEnd={result => extOnDragEnd(result,this,["col1", "col2", "col3"],this.onSaveOrdering)}>
+            <DragDropContext onDragEnd={result => extOnDragEnd(result, this, ["col1", "col2", "col3"], this.onSaveOrdering, this.orderColumns)}>
                 <div className="row">
                     <div className="col-sm-4">
                         {renderDroppable(this.renderQuestions(this.state.col1), "col1")}
@@ -242,7 +324,7 @@ export default class PesonalSheet extends Component {
 
     App() {
         return (<Fragment>
-            <h1>GLOBAL SHEETS</h1>
+            <h1>PERSONAL SHEETS</h1>
             <div className="row">
                 <div className="col-sm-3">
                     {this.renderCurrentSheet(this.state.currentSheet)}
