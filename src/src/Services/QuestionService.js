@@ -52,15 +52,6 @@ export default class QuestionServieces {
             this.handleError(err);
         }
     }
- 
-    async reorder(data) {
-        try {
-            let result = await post("Question/Reorder", data);
-            return result;
-        } catch(err){
-            this.handleError(err);
-        }
-    }
     
     async createQuestion(data, scope) {
         try {
@@ -102,6 +93,24 @@ export default class QuestionServieces {
             let result = await post("Question/AddNewScore", data);
             return result;
         } catch (err) {
+            this.handleError(err);
+        }
+    }
+
+    async reorder(data) {
+        try {
+            let result = await post("Question/Reorder", data);
+            return result;
+        } catch(err){
+            this.handleError(err);
+        }
+    }
+
+    async reorderGlobal(data) {
+        try {
+            let result = await post("Question/ReorderGlobal", data);
+            return result;
+        } catch(err){
             this.handleError(err);
         }
     }

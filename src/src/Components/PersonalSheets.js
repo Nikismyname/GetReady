@@ -1,11 +1,14 @@
+/* #region INIT */
 import React, { Component, Fragment } from "react";
-import * as c from "../Utilities/Constants";
-import { DragDropContext } from 'react-beautiful-dnd';
-import { renderDroppable, extOnDragEnd } from "../Utilities/ReactBeautiful/Constants";
 import { NavLink } from "react-router-dom";
+import * as c from "../Utilities/Constants";
 import QuestionView from "./DumComponents/QuestionView";
 import QuestionSheetService from "../Services/QuestionSheetService";
 import QuestionService from "../Services/QuestionService";
+
+import { DragDropContext } from 'react-beautiful-dnd';
+import { renderDroppable, extOnDragEnd, onDragEndSingle } from "../Utilities/ReactBeautiful/Constants";
+import { orderInitialColumns, orderColumns, createOrderings } from "../Utilities/GlobalPersonalCommon";
 
 const borderString = "3px solid rgba(0, 0, 0, 0.6)";
 
@@ -25,7 +28,6 @@ export default class PersonalSheet extends Component {
         };
 
         this.renderCurrentSheet = this.renderCurrentSheet.bind(this);
-        this.renderSheetChildren = this.renderSheetChildren.bind(this);
         this.renderQuestions = this.renderQuestions.bind(this);
 
         this.navigateToSheet = this.navigateToSheet.bind(this);
@@ -34,18 +36,16 @@ export default class PersonalSheet extends Component {
         this.onClickViewQuestion = this.onClickViewQuestion.bind(this);
         this.onClickDeleteAllQuestions = this.onClickDeleteAllQuestions.bind(this);
 
-        this.orderInitialColumns = this.orderInitialColumns.bind(this);
-        this.orderColumns = this.orderColumns.bind(this);
-
         this.onSaveOrdering = this.onSaveOrdering.bind(this);
+        this.onSaveOrderingSheet = this.onSaveOrderingSheet.bind(this);
 
         this.App = this.App.bind(this);
 
-        this.renderTestLists = this.renderTestLists.bind(this);
-
-        this.parseIncomingSheetData = this.parseIncomingSheetData.bind(this);
+        this.renderQuestionGrid = this.renderQuestionGrid.bind(this);
     }
+    /* #endregion */
 
+    /* #region Navigation */
     componentWillMount() {
         let id = this.props.match.params.id;
         if (id == -1) {
@@ -66,114 +66,23 @@ export default class PersonalSheet extends Component {
         if (getResult.status === 200) {
             window.history.pushState(null, null, newPath);
             let data = getResult.data;
-            this.parseIncomingSheetData(data);
+            data.children = data.children.sort((a,b)=> a.order - b.order);
+            let questions = data.personalQuestions;
+            let columns = orderInitialColumns(questions);
+            this.setState({
+                currentSheet: data,
+                col1: columns[0],
+                col2: columns[1],
+                col3: columns[2],
+                loaded: true,
+            });
         } else {
             alert(getResult.message);
         }
     }
+    /* #endregion */
 
-    parseIncomingSheetData(data) {
-        let state = this.state;
-        state.currentSheet = data;
-        state.loaded = true;
-
-        let questions = data.personalQuestions;
-
-        let columns = this.orderInitialColumns(questions);
-        this.setState(() => ({
-            currentSheet: data,
-            loaded: true,
-            col1: columns[0],
-            col2: columns[1],
-            col3: columns[2],
-        }));
-    }
-
-    orderInitialColumns(questions) { 
-        let unassigned = [];
-        let col1 = [];
-        let col2 = [];
-        let col3 = [];
-
-        for (let i = 0; i < questions.length; i++){
-            let question = questions[i];
-            switch (question.column) {
-                case 1:
-                    col1.push(question);
-                    break;
-                case 2:
-                    col2.push(question);
-                    break;
-                case 3:
-                    col3.push(question);
-                    break;
-                default:
-                    unassigned.push(question);
-                    break;
-            }
-        };
-
-        col1 = col1.sort((a, b) => a.order - b.order);
-        col2 = col2.sort((a, b) => a.order - b.order);
-        col3 = col3.sort((a, b) => a.order - b.order);
-
-        if (unassigned.length === 0) {
-            //console.log("Orderings From Db!");
-            return [col1, col2, col3]
-        } else {
-            return this.orderColumns(col1, col2, col3, unassigned) ;
-        }
-    }
-
-    orderColumns(col1, col2, col3, unassigned = []) {
-        let all = [...col1, ...col2, ...col3, ...unassigned];
-        col1 = col2 = col3 = [];
-        let allLenght = all.length;
-        let remainder = allLenght % 3;
-        let solidColumnLenght = (allLenght - remainder) / 3;
-        let columnOneHasOneExtra = remainder >= 1;
-        let columnTwoHasOneExtra = remainder >= 2;
-        let columnOneLenght = solidColumnLenght + (columnOneHasOneExtra ? 1 : 0);
-        col1 = all.slice(0, columnOneLenght);
-        let columnThoLenght = solidColumnLenght + (columnTwoHasOneExtra ? 1 : 0);
-        col2 = all.slice(columnOneLenght, columnOneLenght + columnThoLenght);
-        col3 = all.slice(columnOneLenght + columnThoLenght);
-
-
-        let columns = [col1, col2, col3];
-
-        let orderings = [];
-
-        for (let i = 0; i < columns.length; i++) {
-            let column = columns[i];
-    
-            for (let j = 0; j < column.length; j++) {
-                let q = column[j];
-                orderings.push([q.id, j, i+1]);
-            };
-        };
-
-        this.onSaveOrdering(orderings);
-
-        return columns;
-    }
-
-    renderQuestions(questions) {
-        return questions.map(question => (
-            {
-                item: (
-                    < QuestionView
-                        q={question}
-                        sheetId={this.state.currentSheet.id}
-                        onClickBody={this.onClickViewQuestion}
-                        onClickDelete={this.onClickDeleteQuestion}
-                    />
-                ),
-                id: question.id
-            }
-        ));
-    }
-
+    /* #region OnClickEvents */
     async onClickDeleteQuestion(e, id) {
         e.preventDefault();
         e.stopPropagation();
@@ -185,9 +94,15 @@ export default class PersonalSheet extends Component {
             newState.col1 = newState.col1.filter(x => x.id !== id);
             newState.col2 = newState.col2.filter(x => x.id !== id);
             newState.col3 = newState.col3.filter(x => x.id !== id);
-            let [col1, col2, col3] = this.orderColumns(newState.col1,newState.col2,newState.col3);
+            let [col1, col2, col3] = orderColumns(newState.col1, newState.col2, newState.col3);
+
+            //saving the orderings on delete
+            let columns = [col1, col2, col3];
+            let orderings = createOrderings(columns);
+            this.onSaveOrdering(orderings);
+
             this.setState({
-                col1,col2,col3,
+                col1, col2, col3,
             });
         } else {
             alert("Delete did not work!");
@@ -204,7 +119,7 @@ export default class PersonalSheet extends Component {
 
         let delResult = await PersonalSheet.questionService
             .deleteAllPersonalForSheet(this.state.currentSheet.id);
-        
+
         if (delResult.status === 200) {
             this.setState({
                 col1: [],
@@ -213,20 +128,6 @@ export default class PersonalSheet extends Component {
             });
         } else {
             alert(delResult.message)
-        }
-    }
-
-    async onSaveOrdering(orders) {
-        let data = {
-            sheetId: this.state.currentSheet.id,
-            orderings: orders,
-        };
-
-        let reorderResult = await PersonalSheet.questionService.reorder(data);
-        if (reorderResult.status === 200) {
-            console.log("Ordering worked!");
-        } else {
-            alert("Ordering did not work!")
         }
     }
 
@@ -243,7 +144,117 @@ export default class PersonalSheet extends Component {
             alert(deleteResult.message);
         }
     }
+    /* #endregion */
 
+    /* #region Ordering */
+    /* #region Grid Ordering */
+    renderQuestions(questions) {
+        return questions.map(question => (
+            {
+                item: <QuestionView
+                    q={question}
+                    sheetId={this.state.currentSheet.id}
+                    onClickBody={this.onClickViewQuestion}
+                    onClickDelete={this.onClickDeleteQuestion}
+                />
+                ,
+                id: question.id
+            }
+        ));
+    }
+
+    renderQuestionGrid() {
+        return (
+            <DragDropContext onDragEnd={result => extOnDragEnd(result, this, ["col1", "col2", "col3"], this.onSaveOrdering, orderColumns)}>
+                <div className="row">
+                    <div className="col-sm-4">
+                        {renderDroppable(this.renderQuestions(this.state.col1), "col1")}
+                    </div>
+                    <div className="col-sm-4">
+                        {renderDroppable(this.renderQuestions(this.state.col2), "col2")}
+                    </div>
+                    <div className="col-sm-4">
+                        {renderDroppable(this.renderQuestions(this.state.col3), "col3")}
+                    </div>
+                </div>
+            </DragDropContext>
+        );
+    }
+
+    async onSaveOrdering(orders) {
+        let data = {
+            sheetId: this.state.currentSheet.id,
+            orderings: orders,
+        };
+
+        let reorderResult = await PersonalSheet.questionService.reorder(data);
+        if (reorderResult.status === 200) {
+            console.log("Ordering worked!");
+        } else {
+            alert("Ordering did not work!")
+        }
+    }
+    /* #endregion */
+    /* #region  Sheet Ordering */
+    renderSheets(sheets) {
+        return sheets.map((x, i) => ({
+            item: <div data-tip="" className="card mb-2"
+                style={{ border: "3px solid rgba(100, 100, 100, 0.6)" }}
+                onClick={() => this.navigateToSheet(x.id)}
+                key={x.id}
+            >
+                <div className="card-body">
+                    <h6 className="card-title">{x.name}</h6>
+                    <a href="#" onClick={(e) => this.onClickDeleteChild(e, x.id)}>Delete</a>
+                    <NavLink
+                        className="ml-2"
+                        to={c.editQuestionSheetPath + "/" + x.id + "/personal/" + this.state.currentSheet.id}
+                        onClick={e => e.stopPropagation()}>
+                        Edit
+                    </NavLink>
+                </div>
+            </div>,
+            id: x.id,
+        }))
+    }
+
+    renderSheetArray() {
+        return (
+            <DragDropContext
+                onDragEnd={result =>
+                    onDragEndSingle(
+                        result,
+                        this,
+                        "children",
+                        this.onSaveOrderingSheet
+                    )}>
+                
+                <div className="row">
+                    <div className="col-sm-12">
+                        {renderDroppable(this.renderSheets(this.state.currentSheet.children), "Children")}
+                    </div>
+                </div>
+            </DragDropContext>
+        );
+    }
+
+    async onSaveOrderingSheet(orders) {
+        let data = {
+            sheetId: this.state.currentSheet.id,
+            orderings: orders,
+        };
+
+        let reorderResult = await PersonalSheet.questionSheetService.reorderPersonal(data);
+        if (reorderResult.status === 200) {
+            console.log("Personal sheet Ordering worked!");
+        } else {
+            alert(reorderResult.message);
+        }
+    }
+    /* #endregion */
+    /* #endregion */
+
+    /* #region Direct Renderings */
     renderCurrentSheet(data) {
         return (
             <div className="card mb-2"
@@ -283,64 +294,29 @@ export default class PersonalSheet extends Component {
         )
     }
 
-    renderSheetChildren(data) {
-        return data.children.map(x => (
-            <div data-tip="" className="card mb-2"
-                style={{ border: "3px solid rgba(100, 100, 100, 0.6)" }}
-                onClick={() => this.navigateToSheet(x.id)}
-                key={x.id}
-            >
-                <div className="card-body">
-                    <h6 className="card-title">{x.name}</h6>
-                    <a href="#" onClick={(e) => this.onClickDeleteChild(e, x.id)}>Delete</a>
-                    <NavLink
-                        className="ml-2"
-                        to={c.editQuestionSheetPath + "/" + x.id + "/personal/" + this.state.currentSheet.id}
-                        onClick={e => e.stopPropagation()}>
-                        Edit
-                    </NavLink>
-                </div>
-            </div>
-        ));
-    }
-
-    renderTestLists() {
-        return (
-            <DragDropContext onDragEnd={result => extOnDragEnd(result, this, ["col1", "col2", "col3"], this.onSaveOrdering, this.orderColumns)}>
-                <div className="row">
-                    <div className="col-sm-4">
-                        {renderDroppable(this.renderQuestions(this.state.col1), "col1")}
-                    </div>
-                    <div className="col-sm-4">
-                        {renderDroppable(this.renderQuestions(this.state.col2), "col2")}
-                    </div>
-                    <div className="col-sm-4">
-                        {renderDroppable(this.renderQuestions(this.state.col3), "col3")}
-                    </div>
-                </div>
-            </DragDropContext>
-        );
-    }
-
     App() {
         return (<Fragment>
             <h1>PERSONAL SHEETS</h1>
             <div className="row">
                 <div className="col-sm-3">
                     {this.renderCurrentSheet(this.state.currentSheet)}
-                    {this.renderSheetChildren(this.state.currentSheet)}
+                    {this.renderSheetArray()}
                 </div>
                 <div className="col-sm-9">
-                    {this.renderTestLists()}
+                    {this.renderQuestionGrid()}
                 </div>
             </div>
         </Fragment>)
     }
+    /*#endregion*/
 
+    /* #region Helpers */
     onCLickStopPropagation(e) {
         e.stopPropagation();
     }
+    /* #endregion */
 
+    /* #region render */
     render() {
         if (this.state.loaded) {
             return this.App();
@@ -348,4 +324,5 @@ export default class PersonalSheet extends Component {
             return (<h1>Loading</h1>);
         }
     }
+    /* #endregion */
 }

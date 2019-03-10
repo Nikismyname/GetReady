@@ -24,6 +24,8 @@ function request(method) {
 
         let Authorization = "";
         let token = localStorage.getItem("token");
+        console.log("token here");
+        console.log(token);
         if (token !== null) {
             Authorization = `Bearer ${token}`
         }

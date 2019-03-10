@@ -51,10 +51,10 @@ export const getEmptyListStyle = isDraggingOver => ({
 });
 
 
-export function renderDroppable(items, name, allowDrag = true) {
-    return <Droppable droppableId={name}>
+export function renderDroppable(items, colId) {
+    return <Droppable droppableId={colId.toString()} direction="horizontal">
         {(provided, snapshot) => (
-            <div
+            <div className="row"
                 ref={provided.innerRef}
                 style={
                     items.length > 0 ?
@@ -63,26 +63,26 @@ export function renderDroppable(items, name, allowDrag = true) {
                 }
             >
                 {items.map((item, index) => (
-                    <Draggable
-                        key={item.id}
-                        draggableId={item.id}
-                        index={index}
-                        isDragDisabled={!allowDrag}
-                    >
-                        {(provided, snapshot) => (
-                            <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                style={getItemStyle(
-                                    snapshot.isDragging,
-                                    provided.draggableProps.style
-                                )}
-                            >
-                                {item.item}
-                            </div>
-                        )}
-                    </Draggable>
+                    <div className="col-sm-4">
+                        <Draggable
+                            key={item.id}
+                            draggableId={item.id}
+                            index={index}>
+                            {(provided, snapshot) => (
+                                <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    style={getItemStyle(
+                                        snapshot.isDragging,
+                                        provided.draggableProps.style
+                                    )}
+                                >
+                                    {item.item}
+                                </div>
+                            )}
+                        </Draggable>
+                        </div>
                 ))}
                 {provided.placeholder}
             </div>
@@ -90,34 +90,7 @@ export function renderDroppable(items, name, allowDrag = true) {
     </Droppable>
 }
 
-export function onDragEndSingle(result, _this, collectionName, saveOrder) {
-    const { source, destination } = result;
-    if (source.droppableId !== destination.droppableId) {
-        return;
-    }
-
-    const items = reorder(
-        _this.state.currentSheet.children,
-        source.index,
-        destination.index
-    );
-
-    let currentSheet = _this.state.currentSheet;
-    currentSheet[collectionName] = items;
-    _this.setState({ currentSheet });
-    saveOrder(createOrderingsSheet(items));
-}
-
-export function createOrderingsSheet(items){
-    let orderings = [];
-    for (let i = 0; i < items.length; i++){
-        orderings[i] = [];
-        orderings[i].push(items[i].id, i);
-    };
-    return orderings;
-}
-
-export async function extOnDragEnd(result, _this, collections, saveReorderings, orderColumns) {
+export async function extOnDragEnd (result, _this, collections, saveReorderings, orderColumns){
     const { source, destination } = result;
 
     // dropped outside the list
@@ -151,7 +124,7 @@ export async function extOnDragEnd(result, _this, collections, saveReorderings, 
 
     let [col1, col2, col3] = orderColumns(_this.state.col1, _this.state.col2, _this.state.col3);
 
-    await _this.setState({ col1, col2, col3 });
+    await _this.setState({col1, col2, col3});
 
     let orderings = [];
 
@@ -160,7 +133,7 @@ export async function extOnDragEnd(result, _this, collections, saveReorderings, 
 
         for (let j = 0; j < _this.state[collection].length; j++) {
             let q = _this.state[collection][j];
-            orderings.push([q.id, j, i + 1]);
+            orderings.push([q.id, j, i+1]);
         };
     };
 

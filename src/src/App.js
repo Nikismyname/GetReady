@@ -67,11 +67,11 @@ export default class App extends Component {
     this.setState(() => ({ user }));
   }
 
-  componentDidMount() {
+  async componentWillMount() {
     var userString = localStorage.getItem("user");
     if (userString !== null) {
       let user = JSON.parse(userString);
-      this.setState(() => ({ user }));
+      await this.setState(() => ({ user }));
     }
   }
 
