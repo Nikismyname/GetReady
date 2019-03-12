@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from "react";
 import * as c from "../Utilities/Constants";
-import Textarea from "react-expanding-textarea";
 import QuestionService from "../Services/QuestionService";
 import BindingForm from "./BindingForm/BindingForm";
+import TextareaAutosize from 'react-textarea-autosize';
 
 export default class EditQuestion extends Component {
     static questionService = new QuestionService();
@@ -71,19 +71,17 @@ export default class EditQuestion extends Component {
         }
     }
 
-    //let fields = ["name", "question", "answer", "comment", "difficulty"];
-
     render() {
         if (this.state.loaded == true) {
             return (
                 <BindingForm formName="Edit Question Form" onSubmit={this.onClickEdit} formattingMap>
                     <input type="text" name="name" value={this.state.name} />
-                    <Textarea name="question" value={this.state.question} />
-                    <Textarea name="answer" value={this.state.answer} />
-                    <Textarea name="comment" value={this.state.comment} />
+                    <TextareaAutosize name="question" value={this.state.question} />
+                    <TextareaAutosize name="answer" value={this.state.answer} />
+                    <TextareaAutosize name="comment" value={this.state.comment} />
                     <input type="number" name="difficulty" value={this.state.difficulty} />
-                    <button type="submit" >Edit</button>
-                    <button type="button" onClick={this.onClickBack}>Back</button>
+                    <button type="button" className= "btn-warning" onClick={this.onClickBack}>Back</button>
+                    <button type="submit" className="btn-success" >Edit</button>
                 </BindingForm>
             );
         } else {

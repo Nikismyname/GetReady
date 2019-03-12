@@ -1,4 +1,4 @@
-export const fetchRoot = "https://localhost:44342/api/";
+export const fetchRoot = "https://localhost:44384/api/";
 
 function request(method) {
     let shouldConsoleLog = true;

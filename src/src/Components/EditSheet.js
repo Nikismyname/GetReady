@@ -76,8 +76,8 @@ export default class EditSheet extends Component {
                     <input type="text" name="description" value={this.state.description} />
                     <input type="number" name="difficulty" value={this.state.difficulty} />
                     <input type="number" name="importance" value={this.state.importance} />
-                    <button type="submit" >Edit</button>
-                    <button type="button" onClick={this.onClickBack}>Back</button>
+                    <button type="button" className="btn-warning" onClick={this.onClickBack}>Back</button>
+                    <button type="submit" className="btn-success" >Edit</button>
                 </BindingForm>
             );
         } else {

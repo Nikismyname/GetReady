@@ -45,8 +45,8 @@ export default function CreateQuestionSheet(props) {
             <input type="text" name="description" />
             <input type="number" name="difficulty" />
             <input type="number" name="importance" />
-            <button type="submit">Create</button>
-            <button type="button" onClick={onClickBack}>Back</button>
+            <button type="button" className="btn-warning" onClick={onClickBack}>Back</button>
+            <button type="submit" className="btn-success" >Create</button>
         </BindingForm>
     );
 }

@@ -1,8 +1,9 @@
 import React, { Component, Fragment } from "react";
 import * as c from "../Utilities/Constants";
-import Textarea from "react-expanding-textarea";
 import QuestionService from "../Services/QuestionService";
 import BindingForm from "./BindingForm/BindingForm";
+
+import TextareaAutosize from 'react-textarea-autosize';
 
 const questionService = new QuestionService();
 
@@ -37,12 +38,12 @@ export default function CreateQuestion(props) {
     return (
         <BindingForm formName="Create Question Form" onSubmit={onClickCreate} formattingMap>
             <input type="text" name="name" />
-            <Textarea name="question" />
-            <Textarea name="answer" />
-            <Textarea name="comment" />
+            <TextareaAutosize name="question" />
+            <TextareaAutosize name="answer" />
+            <TextareaAutosize name="comment" />
             <input type="number" name="difficulty" />
-            <button type="submit">Create</button>
-            <button type="button" onClick={onClickBack}>Back</button>
+            <button type="button" className="btn-warning" onClick={onClickBack}>Back</button>
+            <button type="submit" className="btn-success">Create</button>
         </BindingForm>
     )
 }

@@ -1,3 +1,4 @@
+/* #region INIT */
 import React, { Component, Fragment } from "react";
 import * as c from "../../Utilities/Constants";
 import ShowError from "../../Utilities/ShowError";
@@ -7,6 +8,11 @@ const lableClases = "col-sm-3 col-form-label text-right";
 const inputColumns = "col-sm-9";
 const buttonColumns = "offset-3 col-9";
 const buttonHolderClasses = "text-center mb-4 offset-3 col-9";
+const textAreaTypeName = "TextareaAutosize";
+const inputType = "input";
+const formNameProp = "formName";
+const formNameDefault = "Form";
+const buttonType = "button";
 
 export default class BindingForm extends Component {
     constructor(props) {
@@ -27,9 +33,43 @@ export default class BindingForm extends Component {
         this.getNonButtons = this.getNonButtons.bind(this);
         this.getButtons = this.getButtons.bind(this);
         this.handeleValidationErrors = this.handeleValidationErrors.bind(this);
-
+        this.handleKeyDown = this.handleKeyDown.bind(this);
         this.App = this.App.bind(this);
+    }
+    /* #endregion */
 
+    /* #region Core */
+    defineInitialState() {
+        let childrenInfo = React.Children
+            .map(this.props.children,
+                x => ({ name: x.props.name, type: x.type, inputType: x.props.type, props: x.props }));
+
+        // for (let i = 0; i < childrenInfo.length; i++){
+        //     let child = childrenInfo[i];
+        //     console.log("HERE " + child.type + " " +child.type.name);
+        // };
+
+        let inputs = childrenInfo.filter(x => x.type === inputType || x.type.name === textAreaTypeName);
+
+        console.log(inputs.map(x => x.name));
+
+        let initialState = {};
+        for (let i = 0; i < inputs.length; i++) {
+            let input = inputs[i];
+            if (input.props.value) {
+                initialState[input.name] = input.props.value;
+            } else {
+                initialState[input.name] = "";
+            }
+        };
+
+        if (this.props.formName) {
+            initialState[formNameProp] = this.props.formName;
+        } else {
+            initialState[formNameProp] = formNameDefault;
+        }
+
+        return initialState;
     }
 
     async onFormSubmit(e) {
@@ -52,6 +92,19 @@ export default class BindingForm extends Component {
         }
     }
 
+    handleCHange(e) {
+        let name = e.target.name;
+        let value = e.target.value;
+
+        console.log(name + " " + value);
+
+        this.setState({
+            [name]: value,
+        });
+    }
+    /* #endregion */
+
+    /* #region Field Validation */
     handeleValidationErrors(errors) {
         let newERRORS = this.state.ERRORS;
 
@@ -77,56 +130,12 @@ export default class BindingForm extends Component {
 
         this.setState({ ERRORS: newERRORS });
     }
+    /* #endregion */
 
-    defineInitialState() {
-        let childrenInfo = React.Children
-            .map(this.props.children,
-                x => ({ name: x.props.name, type: x.type, inputType: x.props.type, props: x.props }));
-
-        let inputs = childrenInfo.filter(x => x.type === "input" || x.type.name === "ExpandingTextarea");
-
-        console.log(inputs.map(x => x.name));
-
-        let initialState = {};
-        for (let i = 0; i < inputs.length; i++) {
-            let input = inputs[i];
-            if (input.props.value) {
-                initialState[input.name] = input.props.value;
-            } else {
-                initialState[input.name] = "";
-            }
-        };
-
-        if (this.props.formName) {
-            initialState["formName"] = this.props.formName;
-        } else {
-            initialState["formName"] = "Form";
-        }
-
-        return initialState;
-    }
-
-    handleCHange(e) {
-        let name = e.target.name;
-        let value = e.target.value;
-
-        console.log(name + " " + value);
-
-        this.setState({
-            [name]: value,
-        });
-    }
-
-    fixLabelText(text) {
-        text = text
-            .replace(/([A-Z])/g, ' $1')
-            .replace(/^./, function (str) { return str.toUpperCase(); })
-        return text;
-    }
-
+    /* #region Form Child Parsing */
     getNonButtons() {
         let nonButtons = React.Children.map(this.props.children, child => {
-            if (child.type === "input" || child.type.name === "ExpandingTextarea") {
+            if (child.type === inputType || child.type.name === textAreaTypeName) {
                 return (
                     <Fragment>
                         <ShowError prop={child.props.name} ERRORS={this.state.ERRORS} />
@@ -139,14 +148,15 @@ export default class BindingForm extends Component {
                                         style: { overflow: "hidden", backgroundColor: c.secondaryColor },
                                         className: "form-control-black mb-4",
                                         onChange: this.handleCHange,
-                                        value: this.state[child.props.name]
+                                        value: this.state[child.props.name],
+                                        onKeyDown: this.handleKeyDown,
                                     })
                                 }
                             </div>
                         </div>
                     </Fragment>
                 )
-            } else if (child.type === "button") {
+            } else if (child.type === buttonType) {
                 return null;
             }
             else {
@@ -159,12 +169,11 @@ export default class BindingForm extends Component {
 
     getButtons() {
         let buttons = React.Children.map(this.props.children, child => {
-            if (child.type === "button") {
+            if (child.type === buttonType) {
                 return React.cloneElement(child,
                     {
-                        style: { marginRight: "1em" },
-                        className: "btn btn-primary",
                         ...child.props,
+                        className: "btn btn-primary btn-block "+(child.props.className? child.props.className: ""),
                     }
                 )
             } else {
@@ -175,31 +184,93 @@ export default class BindingForm extends Component {
         buttons = buttons.filter(x => x !== null);
 
         return (
-            <div className="row">
-                <div className={buttonColumns}
+            <Fragment>
+                <div className="offset-3 col-9">
+                    <div
                     style={{
                         display: "flex",
                         justifyContent: "center",
-                    }}
-                >
-                    {buttons}
+                    }}>
+                        {buttons.map((x, i) => {
+                            let transform;
+                            let persentage = "56";
+                            if (i === 1) {
+                                transform = "translateX("+persentage+"%)";
+                            } else {
+                                transform = "translateX(-"+persentage+"%)";
+                            }
+                            return (
+                                
+                                <div className="bottom-fixed mt-4 mb-4"
+                                    style={{transform}}
+                                >
+                                    {x}
+                                </div>
+                            )
+                        })}
+                    </div> 
                 </div>
-            </div>
-        );
+                <div className="pt-4 pb-5" />
+            </Fragment>
+        )
     }
+    /* #endregion */
 
+    /* #region Short Cuts */
+    handleKeyDown(event) {
+        let shortCutEffects = {
+            /*D*/ 68: function (selection) { return "<<p>>\n" + selection + "\n<<p>>" },
+
+            /*A*/ 65: function (selection) { return "<<c>>\n" + selection + "\n<<c>>" },
+            /*F*/ 70: function (selection) { return "<<e>>\n" + selection + "\n<<e>>" },
+
+            /*S*/ 83: function (selection) { return "<<s>>" + selection + "<<s>>" },
+            /*G*/ 71: function (selection) { return "<<em>>" + selection + "<<em>>" },
+        };
+
+        if (event.ctrlKey) {
+            let keys = Object.keys(shortCutEffects);
+            if (keys.includes(event.keyCode.toString())) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                let action = shortCutEffects[event.keyCode];
+
+                let start = event.target.selectionStart;
+                let end = event.target.selectionEnd;
+                let value = event.target.value;
+                let name = event.target.name;
+
+                let prePart = value.slice(0, start);
+                let selection = value.slice(start, end);
+                let postPart = value.slice(end)
+                selection = action(selection);
+                let newVal = prePart + selection + postPart;
+                this.setState({
+                    [name]: newVal,
+                });
+            }
+        }
+    }
+    /* #endregion */
+
+    /* #region Direct Rendering */
     renderForm() {
         return (
-            <Fragment>
+            <form onSubmit={this.onFormSubmit}>
                 {this.getNonButtons()}
                 {this.getButtons()}
-            </Fragment>
+            </form>
         )
     }
 
     renderFormattingMap() {
         if (this.props.formattingMap) {
-            return c.formattingMap.map(x => <p>{x}</p>);
+            return (
+                <div className="top">
+                    {c.formattingMap.map(x => <p>{x}</p>)}
+                </div>
+            );
         } else {
             return null;
         }
@@ -219,9 +290,7 @@ export default class BindingForm extends Component {
                                 <h1>{this.state.formName}</h1>
                             </div>
                         </div>
-                        <form onSubmit={this.onFormSubmit}>
-                            {this.renderForm()}
-                        </form>
+                        {this.renderForm()}
                     </div>
                     <div className="col-4" style={{ marginTop: "5em" }}>
                         {this.renderFormattingMap()}
@@ -230,6 +299,18 @@ export default class BindingForm extends Component {
             </Fragment>
         )
     }
+    /* #endregion */
 
+    /* #region Render */
     render() { return this.App(); }
+    /* #endregion */
+
+    /* #region Helpers */
+    fixLabelText(text) {
+        text = text
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, function (str) { return str.toUpperCase(); })
+        return text;
+    }
+    /* #endregion */
 }

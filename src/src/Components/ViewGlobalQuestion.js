@@ -3,6 +3,7 @@ import Textarea from "react-expanding-textarea";
 import * as c from "../Utilities/Constants";
 import WithPrettyPrint from "../HOC/WithPrettyPrint";
 import { formatText } from "../Utilities/QuestionFunctions";
+import FixedButtons from "./BindingForm/FixedButtons";
 
 class ViewGlobalQuestion extends Component {
     constructor(props) {
@@ -55,17 +56,11 @@ class ViewGlobalQuestion extends Component {
 
     renderControls() {
         return (
-            <div className="row mt-4 mb-4">
-                <div className="col-2">
-                    <button onClick={this.onClickShowComment} className="btn btn-primary btn-block">Show Comment</button>
-                </div>
-                <div className="col-2">
-                    <button onClick={this.onClickShowAnswer} className="btn btn-primary btn-block">Show Answer</button>
-                </div>
-                <div className="col-2">
-                    <button onClick={this.onClickBack} className="btn btn-primary btn-block">Back</button>
-                </div>
-            </div>
+            <FixedButtons>
+                <button onClick={this.onClickShowComment} className="btn btn-primary btn-block">Show Comment</button>
+                <button onClick={this.onClickShowAnswer} className="btn btn-primary btn-block">Show Answer</button>
+                <button onClick={this.onClickBack} className="btn btn-primary btn-block">Back</button>
+            </FixedButtons>
         )
     }
 

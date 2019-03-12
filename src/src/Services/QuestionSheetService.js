@@ -2,10 +2,10 @@
 import { get, post } from "../Data/CRUD";
 
 export default class QuestionSheetService {
-/* #endregion */
-    
+    /* #endregion */
+
     /* #region Scoped */
-    async getOne(id, scope) {
+    async getOne(id, scope) {//x
         try {
             let path = scope === "global" ? "QuestionSheet/GetOnePublic" : "QuestionSheet/GetOnePersonal";
             let result = await get(path, id);
@@ -15,7 +15,7 @@ export default class QuestionSheetService {
         }
     }
 
-    async create(data, scope) {
+    async create(data, scope) { //x
         try {
             let path = scope === "global" ?
                 "QuestionSheet/CreateGlobalSheet" :
@@ -27,7 +27,7 @@ export default class QuestionSheetService {
         }
     }
 
-    async edit(data, scope) {
+    async edit(data, scope) { //x
         try {
             let path = scope === "global" ? "QuestionSheet/EditGlobal" : "QuestionSheet/EditPersonal";
             let result = await post(path, data);
@@ -39,7 +39,7 @@ export default class QuestionSheetService {
     /* #endregion */
 
     /* #region Get All */
-    async getAllGlobal() {
+    async getAllGlobal() { //x
         try {
             let result = await get("QuestionSheet/GetAllGlobal");
             return result;
@@ -48,7 +48,7 @@ export default class QuestionSheetService {
         }
     }
 
-    async getAllPersonal() {
+    async getAllPersonal() { //x
         try {
             let result = await get("QuestionSheet/GetAllPersonal");
             return result;
@@ -59,7 +59,16 @@ export default class QuestionSheetService {
     /* #endregion */
 
     /* #region Get Index */
-    async getPersonalIndex(id) {
+    async getGlobalIndex(id) { //x
+        try {
+            let result = await get("QuestionSheet/GetGlobalIndex", id);
+            return result;
+        } catch (err) {
+            this.handleError(err);
+        }
+    }
+
+    async getPersonalIndex(id) { //x
         try {
             let result = await get("QuestionSheet/GetPersonalIndex", id);
             return result;
@@ -68,18 +77,10 @@ export default class QuestionSheetService {
         }
     }
 
-    async getGlobalIndex(id) {
-        try {
-            let result = await get("QuestionSheet/GetGlobalIndex", id);
-            return result;
-        } catch (err) {
-            this.handleError(err);
-        }
-    }
     /* #endregion */
 
     /* #region Delete */
-    async deleteGlobal(id) {
+    async deleteGlobal(id) { //x
         try {
             let result = await post("QuestionSheet/DeleteGlobal", id);
             return result;
@@ -89,7 +90,7 @@ export default class QuestionSheetService {
         }
     }
 
-    async deletePersonal(id) {
+    async deletePersonal(id) { //x
         try {
             let result = await post("QuestionSheet/DeletePersonal", id);
             return result;
@@ -101,7 +102,7 @@ export default class QuestionSheetService {
     /* #endregion */
 
     /* #region Reorder */
-    async reorderPublic(data) {
+    async reorderPublic(data) { //x
         try {
             let result = await post("QuestionSheet/ReorderGlobal", data);
             return result;
@@ -111,7 +112,7 @@ export default class QuestionSheetService {
         }
     }
 
-    async reorderPersonal(data) {
+    async reorderPersonal(data) { //x
         try {
             let result = await post("QuestionSheet/ReorderPersonal", data);
             return result;
@@ -123,7 +124,7 @@ export default class QuestionSheetService {
     /* #endregion */
 
     /* #region Get Ids from global sheet */
-    async getIdsForSheet(id) {
+    async getIdsForSheet(id) { //x
         try {
             let result = await get("QuestionSheet/GetQuestionIdsForSheet", id);
             return result;

@@ -23,12 +23,13 @@ export const noteBorder = "1px solid rgba(35, 255, 145, 0.6)";
 export const comparisonBorder = "1px solid rgba(225, 0, 255, 0.4)";
 
 export const formattingMap = [
-    "<<c>>  -> Code Block",
-    "<<e>>  -> Emphasis Block",
-    "<<s>>  -> Code Inline",
-    "<<em>> -> Emphasis Inline",
-    "<<p>>  -> Paragraph <T> Block",
-    "<T>    -> Transperant, meaning inline formating can be done inside!",
+    "<<c>> (A) -> Code Block",
+    "<<e>> (F) -> Emphasis Block",
+    "<<s>> (S) -> Code Inline",
+    "<<em>> (G) -> Emphasis Inline",
+    "<<p>> (D) -> Paragraph <T> Block",
+    "Ctrl+(key) -> puts the coresponding tags around the current selection!",
+    "<T> () -> Transperant, meaning inline formating can be done inside!",
 ];
 
 

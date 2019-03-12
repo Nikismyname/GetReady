@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 
-export default class BindingForm extends Component {
+export default class GridButtons extends Component {
     constructor(props) {
         super(props);
     }
@@ -22,7 +22,7 @@ export default class BindingForm extends Component {
 
         return (
             <Fragment>
-                <div className="row mt-4 mb-4 bottom-fixed container">
+                <div className="row mt-4 mb-4 container bottom-fixed">
                     {buttons.map((x, ind) => (
                         <div className={"col-2" + (ind === 0 ? " pl-0" : "")}>
                             {x}
