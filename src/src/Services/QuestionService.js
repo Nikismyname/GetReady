@@ -47,6 +47,7 @@ export default class QuestionServieces {
     }
     /* #endregion */
 
+    /* #region Get */
     async get(id, scope) { //x
         try {
             let path = scope === "global" ? "Question/GetGlobal" : "Question/GetPersonal";
@@ -57,6 +58,17 @@ export default class QuestionServieces {
         }
     }
 
+    async GetQuestionIdsForApproval() {
+        try {
+            let result = await get("Question/GetQuestionIdsForApproval");
+            return result;
+        } catch (err) {
+            this.handleError(err);
+        }
+    }
+    /* #endregion */
+
+    /* #region Create */
     async createQuestion(data, scope) { //x 
         try {
             let path = scope === "global" ? "Question/CreateGlobal" : "Question/CreatePersonal";
@@ -66,7 +78,9 @@ export default class QuestionServieces {
             this.handleError(err);
         }
     }
+    /* #endregion */
 
+    /* #region Edit */
     async edit(data, scope) {//x
         try {
             let path = scope === "global" ? "Question/EditGlobal" : "Question/EditPersonal";
@@ -77,7 +91,54 @@ export default class QuestionServieces {
             this.handleError(err);
         }
     }
+    /* #endregion */
 
+    /* #region Reorder */
+    async reorder(data) {//x
+        try {
+            let result = await post("Question/ReorderPersonal", data);
+            return result;
+        } catch (err) {
+            this.handleError(err);
+        }
+    }
+
+    async reorderGlobal(data) {//x
+        try {
+            let result = await post("Question/ReorderGlobal", data);
+            return result;
+        } catch (err) {
+            this.handleError(err);
+        }
+    }
+    /* #endregion */
+
+    /* #region Approve/Reject Question */
+    async ApproveQuestion(questionId, sheetId) {
+        let data = {
+            questionId,
+            sheetId,
+        };
+
+        try {
+            let result = await post("Question/ApproveQuestion", data);
+            return result;
+        } catch (err) {
+            this.handleError(err);
+        }
+    } 
+
+    async RejectQuestion(id) {
+        try {
+            let result = await post("Question/RejectQuestion", id);
+            return result;
+        } catch (err) {
+            this.handleError(err);
+        }
+    }
+    /* #endregion */
+    
+    /* #region Other */
     async copyQuestions(data) {//x
         try {
             let result = await post("Question/CopyQuestions", data);
@@ -100,23 +161,15 @@ export default class QuestionServieces {
         }
     }
 
-    async reorder(data) {//x
+    async SuggestForPublishing(id) {
         try {
-            let result = await post("Question/ReorderPersonal", data);
+            var result = await post("Question/SuggestForPublishing", id);
             return result;
         } catch (err) {
             this.handleError(err);
         }
     }
-
-    async reorderGlobal(data) {//x
-        try {
-            let result = await post("Question/ReorderGlobal", data);
-            return result;
-        } catch (err) {
-            this.handleError(err);
-        }
-    }
+    /* #endregion */
 
     /* #region helpers */
     handleError(err) {

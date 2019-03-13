@@ -21,6 +21,7 @@ import EditQuestion from "./Components/EditQuestion";
 import EditSheet from "./Components/EditSheet";
 import NotFound from "./Components/DumComponents/NotFound";
 import Tests from "./Tests/TestInlineCode";
+import CopyQuestions2 from "./Components/Selectors/SelectQuestions2";
 
 import './css/bootstrap-slate-4-1-3.css';
 import "./css/app.css";
@@ -152,7 +153,7 @@ export default class App extends Component {
                 render={(props) => <CreateQuestion {...props} isInternal={false} />} />
 
               {/*Copy Questions*/}
-              <Route exact path={c.copyQuestionsPath+"/:sheetId"} component={CopyQuestion} />
+              <Route exact path={c.copyQuestionsPath+"/:sheetId"} component={CopyQuestions2} />
 
               {/*Test*/}
               <Route exact path={c.testPath + "/:id/:mode"} render={(props) =>

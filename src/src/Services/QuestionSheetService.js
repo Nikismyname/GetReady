@@ -48,6 +48,15 @@ export default class QuestionSheetService {
         }
     }
 
+    async getAllFoldersGlobal() { //x
+        try {
+            let result = await get("QuestionSheet/GetAllFoldersGlobal");
+            return result;
+        } catch (err) {
+            this.handleError(err);
+        }
+    }
+
     async getAllPersonal() { //x
         try {
             let result = await get("QuestionSheet/GetAllPersonal");

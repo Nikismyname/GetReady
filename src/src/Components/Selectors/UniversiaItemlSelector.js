@@ -1,22 +1,17 @@
 import React, { Component, Fragment } from "react";
-import QuestionSheetService from "../../Services/QuestionSheetService";
-
-export default class GlobalQuestionPicker extends Component {
-    static questionSheetService = new QuestionSheetService();
-
+//The universial item selector acceppts list of folders with id, name and parentId-int or null
+//as well as list of item for every folder with name and id
+export default class UniversialSelector extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            sheets: [],
-            /// id:1, name:"", questionSheetId: null/1
+            sheets: this.modifyInitialData(this.props.data),
+            /// id:1, name:"", parentId: null/1
             /// isSelected: false,
-            ///globalQuestions: [{id: 1, name: "", isSelected=false}] 
-            selectedId: 0,
-            loaded: false,
-            collapsedIds: [],
+            /// items: [{id: 1, name: "", isSelected=false}]
+            collapsedIds: this.setInitialCollapsedIds(this.props.data),
             textSelection: true,
-            onSelectFolderSelecAllSubfolders: false
         };
 
         this.App = this.App.bind(this);
@@ -29,49 +24,40 @@ export default class GlobalQuestionPicker extends Component {
 
         this.onClickSelectFolder = this.onClickSelectFolder.bind(this);
         this.onClickSelectFile = this.onClickSelectFile.bind(this);
+
+        this.modifyInitialData = this.modifyInitialData.bind(this);
     }
 
-    async componentDidMount() {
-        let sheetId = Number(this.props.sheetId);
-        console.log("SHEET ID");
-        console.log(sheetId);
-
-        let getAllResult = await GlobalQuestionPicker.questionSheetService.getAllGlobal();
-
-        if (getAllResult.status === 200) {
-            let data = getAllResult.data;
-            for (let i = 0; i < data.length; i++) {
-                data[i].isSelected = false;
-                for (let j = 0; j < data[i].globalQuestions.length; j++) {
-                    data[i].globalQuestions[j].isSelected = false;
-                };
+    modifyInitialData(data) {
+        console.log(data);
+        for (let i = 0; i < data.length; i++) {
+            data[i].isSelected = false;
+            for (let j = 0; j < data[i].items.length; j++) {
+                data[i].items[j].isSelected = false;
             };
+        };
 
-            let nonCollapsedIds = [];
-            console.log("DATA");
-            console.log(data);
-            let currentSheet = data.filter(x => x.id === sheetId)[0];
-            console.log("CURRENT SHEET");
-            console.log(currentSheet);
-            nonCollapsedIds.push(currentSheet.id);
-            while (true) {
-                if (currentSheet.questionSheetId === null) {
-                    break;
-                }
-                currentSheet = data.filter(x => x.id === currentSheet.questionSheetId)[0];
-                nonCollapsedIds.push(currentSheet.id);
+        return data;
+    }
+
+    setInitialCollapsedIds(data) {
+        let sheetId = Number(this.props.sheetId);
+
+        let nonCollapsedIds = [];
+
+        let currentSheet = data.filter(x => x.id === sheetId)[0];
+
+        nonCollapsedIds.push(currentSheet.id);
+        while (true) {
+            if (currentSheet.parentId === null) {
+                break;
             }
-
-            let collapsedIds = data.map(x => x.id).filter(x=>!nonCollapsedIds.includes(x));
-
-            this.setState(() => ({
-                sheets: data,
-                loaded: true,
-                collapsedIds,
-            }));
-        } else {
-            alert(getAllResult.message);   
+            currentSheet = data.filter(x => x.id === currentSheet.parentId)[0];
+            nonCollapsedIds.push(currentSheet.id);
         }
+
+        let collapsedIds = data.map(x => x.id).filter(x => !nonCollapsedIds.includes(x));
+        return collapsedIds;
     }
 
     onClickExpand(e, id) {
@@ -94,26 +80,26 @@ export default class GlobalQuestionPicker extends Component {
     }
 
     onClickSelect() {
-        let result = [];
-        for (let i = 0; i < this.state.sheets.length; i++){
-            let sheet = this.state.sheets[i];
-            for (let j = 0; j < sheet.globalQuestions.length; j++){
-                let question = sheet.globalQuestions[j];
-                if (question.isSelected) {
-                    result.push(question.id);
-                }
+            let result = [];
+            for (let i = 0; i < this.state.sheets.length; i++) {
+                let sheet = this.state.sheets[i];
+                for (let j = 0; j < sheet.items.length; j++) {
+                    let question = sheet.items[j];
+                    if (question.isSelected) {
+                        result.push(question.id);
+                    }
+                };
             };
-        };
-        this.props.callBack(result);
+            this.props.callBack(result);
     }
 
     onClickSelectFile(sheetId, questionId) {
         let newSheets = this.state.sheets;
         let question = newSheets
             .filter(x => x.id === sheetId)[0]
-            .globalQuestions
+            .items
             .filter(x => x.id === questionId)[0];
-                
+
         console.log(question.isSelected);
         question.isSelected = !question.isSelected;
         console.log(question.isSelected);
@@ -128,20 +114,21 @@ export default class GlobalQuestionPicker extends Component {
         let newSelectValue = selectedSheet.isSelected ? false : true;
 
         selectedSheet.isSelected = newSelectValue;
-        for (let i = 0; i < selectedSheet.globalQuestions.length; i++) {
-            selectedSheet.globalQuestions[i].isSelected = newSelectValue;
+        for (let i = 0; i < selectedSheet.items.length; i++) {
+            selectedSheet.items[i].isSelected = newSelectValue;
         };
 
         this.setState(() => ({ sheets: newSheets }));
     }
 
     renderSheets(sheets) {
-        let root = sheets.filter(x => x.questionSheetId === null)[0];
+        let root = sheets.filter(x => x.parentId === null)[0];
         return this.renderSingleSheet(root);
     }
 
     renderSingleSheet(sheet) {
-        let children = this.state.sheets.filter(x => x.questionSheetId === sheet.id);
+        let children = this.state.sheets.filter(x => x.parentId
+            === sheet.id);
 
         let style = {};
         style.display = "inline-block"
@@ -199,7 +186,7 @@ export default class GlobalQuestionPicker extends Component {
             return null;
         }
 
-        return sheet.globalQuestions.map(gq => {
+        return sheet.items.map(gq => {
             return (
                 <div>
                     <input
@@ -248,14 +235,9 @@ export default class GlobalQuestionPicker extends Component {
         )
     }
 
-    render() {
-        if (this.state.loaded) {
-            return this.App();
-        } else {
-            return <h1>Loading</h1>
-        }
-    }
+    render() { return this.App(); }
 
+    /* #region Helpers */
     clearSelection() {
         if (window.getSelection) {
             if (window.getSelection().empty) {  // Chrome
@@ -267,4 +249,5 @@ export default class GlobalQuestionPicker extends Component {
             document.selection.empty();
         }
     }
+    /* #endregion */
 }
