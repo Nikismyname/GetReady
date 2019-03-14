@@ -4,6 +4,7 @@ import QuestionService from "../../Services/QuestionService";
 import QuestionSheetService from "../../Services/QuestionSheetService";
 import * as c from "../../Utilities/Constants";
 
+//path/:id/:mode(single or not)
 export default class Test extends Component {
     static questionService = new QuestionService();
     static questionSheetService = new QuestionSheetService();

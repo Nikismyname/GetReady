@@ -87,6 +87,11 @@ export default class PersonalSheet extends Component {
         e.preventDefault();
         e.stopPropagation();
 
+        let confirmResult = window.confirm("Are you sure you want to delete this question!");
+        if (confirmResult === false) {
+            return;    
+        }
+
         let deleteResult = await PersonalSheet.questionService.deletePersonal(id);
 
         if (deleteResult.status === 200) {
@@ -117,6 +122,11 @@ export default class PersonalSheet extends Component {
         e.stopPropagation();
         e.preventDefault();
 
+        let confirmResult = window.confirm("Are you sure you want to delete all Questions!");
+        if (confirmResult === false) {
+            return;    
+        }
+
         let delResult = await PersonalSheet.questionService
             .deleteAllPersonalForSheet(this.state.currentSheet.id);
 
@@ -135,6 +145,11 @@ export default class PersonalSheet extends Component {
         e.preventDefault();
         e.stopPropagation();
 
+        let confirmResult = window.confirm("Are you sure you want to delete this folder!");
+        if (confirmResult === false) {
+            return;    
+        }
+
         let deleteResult = await PersonalSheet.questionSheetService.deletePersonal(id);
         if (deleteResult.status === 200) {
             let newState = this.state;
@@ -144,6 +159,19 @@ export default class PersonalSheet extends Component {
             alert(deleteResult.message);
         }
     }
+
+    async onClickPublish(e, id) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        let publishResult = await PersonalSheet.questionService.SuggestForPublishing(id);
+        if (publishResult.status === 200) {
+            alert("Question successfully suggested for Publishing!");
+        } else {
+            alert(publishResult.message);
+        }
+    }
+
     /* #endregion */
 
     /* #region Ordering */
@@ -156,6 +184,7 @@ export default class PersonalSheet extends Component {
                     sheetId={this.state.currentSheet.id}
                     onClickBody={this.onClickViewQuestion}
                     onClickDelete={this.onClickDeleteQuestion}
+                    onClickPublish={this.onClickPublish}
                 />
                 ,
                 id: question.id

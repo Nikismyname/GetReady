@@ -66,6 +66,15 @@ export default class QuestionServieces {
             this.handleError(err);
         }
     }
+
+    async GetAnsweredQuestions() {
+        try {
+            let result = await get("Question/GetAnsweredQuestions");
+            return result;
+        } catch (err) {
+            this.handleError(err);
+        }
+    }
     /* #endregion */
 
     /* #region Create */
@@ -117,7 +126,7 @@ export default class QuestionServieces {
     async ApproveQuestion(questionId, sheetId) {
         let data = {
             questionId,
-            sheetId,
+            globalParentSheetId: sheetId,
         };
 
         try {

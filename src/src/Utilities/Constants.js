@@ -16,6 +16,8 @@ export const copyQuestionsPath = "/question/copy";
 export const editQuestionPath = "/question/edit";
 export const editQuestionSheetPath = "/question-sheet/edit";
 export const testPath = "/test";
+export const filterQuestionsPath = "/questions/filter"
+export const reviewQuestionsPath = "/questions/review"
 
 export const videoNotesBorder = "1px solid rgba(3, 91, 255, 0.6)";
 export const listToDoBorder = "1px solid rgba(253, 194, 2, 0.6)";

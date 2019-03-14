@@ -95,6 +95,11 @@ export default class GlobalSheets extends Component {
         e.preventDefault();
         e.stopPropagation();
 
+        let confirmResult = window.confirm("Are you sure you want to delete this Question!");
+        if (confirmResult === false) {
+            return;    
+        }
+
         let deleteResult = await GlobalSheets.questionService.deleteGlobal(id);
         if (deleteResult.status === 200) {
             let newState = this.state;
@@ -124,6 +129,10 @@ export default class GlobalSheets extends Component {
         e.preventDefault();
         e.stopPropagation();
 
+        let confirmResult = window.confirm("Are you sure you want to delete this Folder!");
+        if (confirmResult === false) {
+            return;    
+        }
 
         let deleteResult = await GlobalSheets.questionSheetService.deleteGlobal(id);
         if (deleteResult.status === 200) {

@@ -10,8 +10,12 @@ export default class GridButtons extends Component {
             if (child.type === "button") {
                 return React.cloneElement(child,
                     {
-                        className: "btn btn-primary btn-block",
                         ...child.props,
+                        className: "btn btn-primary btn-block" +
+                            (child.props.className ? 
+                               " "+child.props.className :
+                            "")
+
                     }
                 )
             } else {

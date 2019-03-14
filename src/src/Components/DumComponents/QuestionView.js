@@ -22,6 +22,13 @@ export default function QuestionView(props) {
                         onClick={(e) => { e.stopPropagation() }}>
                         Edit
                     </NavLink>
+                    <a
+                        className="ml-1"
+                        href="#"
+                        onClick={(e) => props.onClickPublish(e, props.q.id)}
+                    >
+                        Publish
+                    </a>
                 </div>
             </div>
         </div>

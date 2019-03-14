@@ -3,7 +3,7 @@ import QuestionService from "../../Services/QuestionService";
 import QuestionSheetService from "../../Services/QuestionSheetService";
 import FixedPuttons from "../BindingForm/FixedButtons";
 import UniversialFolderSelector from "../Selectors/UniversialFolderSelector";
-import * as c from "../../Utilities/Constants";
+import QuestionViewer from "./QuestionViewer";
 
 export default class QuestionFiltering extends Component {
     static questionService = new QuestionService();
@@ -16,15 +16,18 @@ export default class QuestionFiltering extends Component {
             loaded: false,
             questionIds: [],
             currentQuestion: {},
-            selectingDir = false,
+            selectingDir: false,
             allGlobalFolders: [],
         }
 
         this.index = 0;
 
         this.fetchQuestion = this.fetchQuestion.bind(this);
+
         this.onClickReject = this.onClickReject.bind(this);
         this.onClickApprove = this.onClickApprove.bind(this);
+        this.onClickPass = this.onClickPass.bind(this);
+
         this.onDirSelected = this.onDirSelected.bind(this);
 
         this.controls = this.controls.bind(this);
@@ -38,15 +41,18 @@ export default class QuestionFiltering extends Component {
                 alert("No Questions For Approval!");
                 this.props.history.push("/");
             } else {
-                this.setState({ questionIds: ids });
+                await this.setState({ questionIds: ids });
                 this.fetchQuestion();
             }
+        } else {
+            alert(getResult.message);
         }
     }
 
     async fetchQuestion() {
         while (true) {
             if (this.index >= this.state.questionIds.length) {
+                alert("No More Questions!")
                 this.props.history.push("/");
                 break;
             } else {
@@ -57,8 +63,10 @@ export default class QuestionFiltering extends Component {
 
                 if (getResult.status === 200) {
                     let question = getResult.data;
-                    this.setState({ currentQuestion: question });
+                    this.setState({ currentQuestion: question, loaded: true });
                     break;
+                } else {
+                    console.log("Skiped Question!");
                 }
             }
         }
@@ -66,9 +74,9 @@ export default class QuestionFiltering extends Component {
 
 
     async onClickApprove() {
-        getResult = await QuestionFiltering.questionSheetService.getAllFoldersGlobal();
+        let getResult = await QuestionFiltering.questionSheetService.getAllFoldersGlobal();
         if (getResult.status === 200) {
-            let folderData = getResult.data.map(x = ({
+            let folderData = getResult.data.map(x => ({
                 id: x.id,
                 name: x.name,
                 parentId: x.questionSheetId,
@@ -83,22 +91,31 @@ export default class QuestionFiltering extends Component {
         }
     }
 
-    async onClickReject() {
+    onClickReject() {
         QuestionFiltering.questionService.RejectQuestion(this.state.questionIds[this.index - 1]);
         this.fetchQuestion();
     }
 
-    onDirSelected(dirId) {
-        this.setState({ selectingDir: false });
-        QuestionFiltering.questionService.ApproveQuestion(this.state.questionIds[this.index - 1], dirId);
+    onClickPass() {
+        this.fetchQuestion();
+    }
+
+    async onDirSelected(dirId) {
+        await this.setState({ selectingDir: false });
+        let result = await QuestionFiltering.questionService
+            .ApproveQuestion(this.state.questionIds[this.index - 1], dirId);
+        if (result.status !== 200) {
+            alert(result.message);
+        }
         this.fetchQuestion();
     }
 
     controls() {
         return (
             <FixedPuttons>
-                <button onClick={this.OnClickApprove} className="btn-success">Approve</button>
+                <button onClick={this.onClickApprove} className="btn-success">Approve</button>
                 <button onClick={this.onClickReject} className="btn-warning">Reject</button>
+                <button onClick={this.onClickPass}>Pass</button>
             </FixedPuttons>
         )
     }
@@ -108,17 +125,21 @@ export default class QuestionFiltering extends Component {
             return (
                 <UniversialFolderSelector
                     data={this.state.allGlobalFolders}
-                    scope={"public"}
+                    scope={"global"}
                     callBack = {this.onDirSelected}
                 />
             )
         } else {
-            return (
-                <QuestionViewer
-                    controls={this.controls}
-                    question={this.currentQuestion}
-                />
-            )
+            if (this.state.loaded) {
+                return (
+                    <QuestionViewer
+                        controls={this.controls}
+                        question={this.state.currentQuestion}
+                    />
+                )
+            } else {
+                return "Loading ...";
+            }
         }
     }
 }

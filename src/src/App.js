@@ -15,13 +15,15 @@ import GlobalSheets from "./Components/GlobalSheets";
 import CreateQuestionSheet from "./Components/CreateQuestionSheet";
 import ViewGlobalQuestion from "./Components/ViewGlobalQuestion";
 import PersonalSheets from "./Components/PersonalSheets";
-import CopyQuestion from "./Components/Selectors/SelectQuestions";
+import CopyQuestions2 from "./Components/Selectors/SelectQuestions2";
 import Test from "./Components/Test/Test";
 import EditQuestion from "./Components/EditQuestion";
 import EditSheet from "./Components/EditSheet";
 import NotFound from "./Components/DumComponents/NotFound";
+import FilterQuestions from "./Components/Admin/QuestionFiltering";
+import QuestionReview from "./Components/QuestionReview";
 import Tests from "./Tests/TestInlineCode";
-import CopyQuestions2 from "./Components/Selectors/SelectQuestions2";
+import CopyQuestion from "./Components/Selectors/SelectQuestions";
 
 import './css/bootstrap-slate-4-1-3.css';
 import "./css/app.css";
@@ -143,6 +145,10 @@ export default class App extends Component {
               {/*Create Question Sheet*/}
               <Route exact path={c.createGlobalSheetPath + "/:id/:scope"}
                 component={CreateQuestionSheet} />
+              
+              {/*Review Questions*/}
+              <Route exact path={c.reviewQuestionsPath}
+                component={QuestionReview} />
 
               {/*View Global Question*/}
               {/*I*/}<Route exact path={c.viewGlobalQuestion + "/:id/:sheetId"}
@@ -170,6 +176,9 @@ export default class App extends Component {
               {/*Edit Question Sheet*/}
               <Route exact path={c.editQuestionSheetPath + "/:id/:scope/:sheetId"}
                 component={EditSheet} />
+              
+              <Route exact path={c.filterQuestionsPath}
+                component={FilterQuestions} />
 
               {/*Home*/}
               <Route exact path="/"

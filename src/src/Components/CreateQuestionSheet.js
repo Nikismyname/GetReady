@@ -15,11 +15,11 @@ export default function CreateQuestionSheet(props) {
 
         let createResult = await questionSheetService.create(data, scope);
         if (createResult.status === 200) {
-            if (isGlobal) {
-                props.history.push(c.globalQuestionSheetsPath + "/" + props.match.params.id);
+            if (props.isInternal) {
+                props.callBack(createResult.data, data.name);
             } else {
-                if (props.isInternal) {
-                    props.callBack(createResult.data, data.name);
+                if (isGlobal) {
+                    props.history.push(c.globalQuestionSheetsPath + "/" + props.match.params.id);
                 } else {
                     props.history.push(c.personalQuestionSheetsPath + "/" + props.match.params.id);
                 }

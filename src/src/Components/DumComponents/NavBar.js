@@ -73,6 +73,8 @@ export default function NavBar(props){
                                 "/-1", "Public Questions", "none")}
                             {renderNavItem(c.personalQuestionSheetsPath +
                                 "/-1", "Perspnal Questions", "user")}
+                            {renderNavItem(c.reviewQuestionsPath, "Review Questions", "user")}
+                            {renderNavItem(c.filterQuestionsPath, "Filter Questions", "admin")}
                             {/*renderNavItem("/tests", "Tests", "none")*/}
                         </ul>
                         <ul className="navbar-nav ml-auto">
