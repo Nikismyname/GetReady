@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import WithPrettyPrint from "../../HOC/WithPrettyPrint";
 import { formatText } from "../../Utilities/QuestionFunctions";
-import FixedButtons from "../BindingForm/FixedButtons";
+import FixedButtons from "../Common/ChildParsers/FixedButtons";
 
 //props: controls, question
 class QuestionViewer extends Component {

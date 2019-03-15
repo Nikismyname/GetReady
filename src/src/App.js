@@ -6,24 +6,27 @@ import QuestionSheetService from "./Services/QuestionSheetService";
 import WithInitialData from "./HOC/WithInitialData";
 
 import * as c from "./Utilities/Constants"
-import Login from "./Components/Login";
-import Register from "./Components/Register";
-import NavBar from "./Components/DumComponents/NavBar";
-import Home from "./Components/Home";
-import CreateQuestion from "./Components/CreateQuestion";
-import GlobalSheets from "./Components/GlobalSheets";
-import CreateQuestionSheet from "./Components/CreateQuestionSheet";
-import ViewGlobalQuestion from "./Components/ViewGlobalQuestion";
-import PersonalSheets from "./Components/PersonalSheets";
-import CopyQuestions2 from "./Components/Selectors/SelectQuestions2";
-import Test from "./Components/Test/Test";
-import EditQuestion from "./Components/EditQuestion";
-import EditSheet from "./Components/EditSheet";
-import NotFound from "./Components/DumComponents/NotFound";
+import Login from "./Components/User/Login";
+import Register from "./Components/User/Register";
+
+import CreateQuestion from "./Components/Common/Crud/CreateQuestion";
+import CreateQuestionSheet from "./Components/Common/Crud/CreateQuestionSheet";
+import EditQuestion from "./Components/Common/Crud/EditQuestion";
+import EditSheet from "./Components/Common/Crud/EditSheet";
+
+import GlobalSheets from "./Components/Global/GlobalSheets";
+import ViewGlobalQuestion from "./Components/Global/ViewGlobalQuestion";
+import CopyQuestions2 from "./Components/Global/SelectQuestions2";
+
+import PersonalSheets from "./Components/Personal/PersonalSheets";
+import Test from "./Components/Personal/Test/Test";
+import QuestionReview from "./Components/Personal/QuestionReview";
+
 import FilterQuestions from "./Components/Admin/QuestionFiltering";
-import QuestionReview from "./Components/QuestionReview";
-import Tests from "./Tests/TestInlineCode";
-import CopyQuestion from "./Components/Selectors/SelectQuestions";
+
+import NotFound from "./Components/Common/PagesAndPartials/NotFound";
+import NavBar from "./Components/Common/PagesAndPartials/NavBar";
+import Home from "./Components/Common/PagesAndPartials/Home";
 
 import './css/bootstrap-slate-4-1-3.css';
 import "./css/app.css";

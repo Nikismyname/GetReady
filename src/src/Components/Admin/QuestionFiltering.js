@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from "react";
 import QuestionService from "../../Services/QuestionService";
 import QuestionSheetService from "../../Services/QuestionSheetService";
-import FixedPuttons from "../BindingForm/FixedButtons";
-import UniversialFolderSelector from "../Selectors/UniversialFolderSelector";
+import FixedPuttons from "../Common/ChildParsers/FixedButtons";
+import UniversialFolderSelector from "../Common/Selectors/UniversialFolderSelector";
 import QuestionViewer from "./QuestionViewer";
 
 export default class QuestionFiltering extends Component {
