@@ -31,7 +31,7 @@ function parseCodeBlock(text) {
 }
 
 function parseEmpBlock(text) {
-    console.log("EMP PARSED: "+ text);
+    //console.log("EMP PARSED: "+ text);
     return (
         <div
             style={{
@@ -93,25 +93,6 @@ function parseInlineEmp(text) {
     >{text}
     </span>
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

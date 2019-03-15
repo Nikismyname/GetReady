@@ -27,11 +27,6 @@ function ParseTransperantBlockElements(text, mappings) {
                 continue;
             };
             if (result[k][0].length === 0 || result[k][0]==="\n") {
-                // if (toEqual === 1) {
-                //     toEqual = 0;
-                // } else {
-                //     toEqual = 1;
-                // }
                 continue;
             };
 
@@ -54,7 +49,7 @@ function ParseTransperantBlockElements(text, mappings) {
         result = newResult;
     };
 
-    console.log("NUMBER OF TRANS BLOCK ELEMENTS: " + result.length);
+    //console.log("NUMBER OF TRANS BLOCK ELEMENTS: " + result.length);
 
     for (let i = 0; i < result.length; i++) {
         if (result[i][1] === false) {
@@ -80,11 +75,6 @@ function ParseBlockElements(text, mappings) {
                 continue;
             };
             if (result[k][0].length === 0 || result[k][0]==="\n") {
-                // if (toEqual === 1) {
-                //     toEqual = 0;
-                // } else {
-                //     toEqual = 1;
-                // }
                 continue;
             };
             let currText = result[k][0];
@@ -107,7 +97,7 @@ function ParseBlockElements(text, mappings) {
         result = newResult;
     };
 
-    console.log("NUMBER OF BLOCK ELEMENTS: " + result.length);
+    //console.log("NUMBER OF BLOCK ELEMENTS: " + result.length);
 
     for (let i = 0; i < result.length; i++) {
         if (result[i][1] === false) {

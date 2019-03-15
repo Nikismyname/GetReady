@@ -110,7 +110,7 @@ export default class PersonalSheet extends Component {
                 col1, col2, col3,
             });
         } else {
-            alert("Delete did not work!");
+            alert(deleteResult.message);
         }
     }
 

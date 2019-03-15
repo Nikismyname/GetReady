@@ -31,6 +31,8 @@ export default class EditQuestion extends Component {
         let getResult = await EditQuestion.questionService.get(id, scope);
 
         if (getResult.status === 200) {
+            console.log("EDIT DATA HERE");
+            console.log(getResult.data);
             let q = getResult.data;
             this.setState(() => ({
                 loaded: true,

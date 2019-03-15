@@ -186,13 +186,13 @@ export default class UniversialFolderSelector extends Component {
                     onClick={this.onClickSelect}
                     className="btn btn-success no-text-selection bottom mt-4"
                 >
-                    Select Sheet
+                    Select Dir
                 </button>
                 <button
                     onClick={this.onCLickCreateDir}
                     className="btn btn-success no-text-selection bottom mt-4"
                 >
-                    Create Sheet
+                    Create Dir
                 </button>
             </Fragment>
         );

@@ -24,11 +24,11 @@ export default function Register(props) {
     //let fields = ["username", "password", "repeatPassword", "firstName", "lastName"];
     return (
         <BindingForm formName="Register Form" onSubmit={onClickRegister}>
-            <input type="text" name="username" />
-            <input type="password" name="password" />
-            <input type="password" name="repeatPassword" />
-            <input type="text" name="firstName" />
-            <input type="text" name="lastName" />
+            <input name="username" minLength="3" required type="text"/>
+            <input name="password" minLength="6" required type="password" />
+            <input name="repeatPassword" minLength="6" required type="password"/>
+            <input name="firstName" minLength="1" required type="text" />
+            <input name="lastName" minLength="1" required type="text"  />
             <button type="submit">Register</button>
             <button type="button" onClick={onClickGoBack}>Back</button>
         </BindingForm>

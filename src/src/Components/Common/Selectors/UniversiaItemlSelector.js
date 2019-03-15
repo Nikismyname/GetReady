@@ -220,7 +220,7 @@ export default class UniversialSelector extends Component {
                 onClick={this.onClickSelect}
                 className="btn btn-success no-text-selection bottom mt-4"
             >
-                Select Sheet
+                Select Items
             </button>
         );
     }
