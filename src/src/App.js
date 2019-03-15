@@ -28,13 +28,13 @@ import NotFound from "./Components/Common/PagesAndPartials/NotFound";
 import NavBar from "./Components/Common/PagesAndPartials/NavBar";
 import Home from "./Components/Common/PagesAndPartials/Home";
 
+import protectedRoute from "./HOC/ProtectedRoute";
+
 import './css/bootstrap-slate-4-1-3.css';
 import "./css/app.css";
 import "./css/desert.css";
 
 let questionService = new QuestionService();
-let questionSheetService = new QuestionSheetService();
-
 const ViewGlobalQuestionWithInitialData = WithInitialData(
   ViewGlobalQuestion,
   questionService.getGlobalInit,
@@ -94,7 +94,7 @@ export default class App extends Component {
               setPersonalReturnId={this.setPersonalReturnId}
               setGlobalReturnId={this.setGlobalReturnId}
             />
-          }/>
+          } />
 
           <div className="container p-0">
             <Switch>
@@ -112,16 +112,18 @@ export default class App extends Component {
                 }
               />
 
+
               {/*PersonalSheets*/}
-              <Route exact path={c.personalQuestionSheetsPath + "/:id"}
-                render={(props) =>
-                  <PersonalSheets
-                    {...props}
-                    setUserReturnId={this.setPersonalReturnId}
-                    savedId={this.state.personalRethurnId}
-                  />
-                }
-              />
+              {protectedRoute(
+                <Route exact path={c.personalQuestionSheetsPath + "/:id"}
+                  render={(props) =>
+                    <PersonalSheets
+                      {...props}
+                      setUserReturnId={this.setPersonalReturnId}
+                      savedId={this.state.personalRethurnId}
+                    />
+                  }
+                />, this.state.user, "User")}
 
               {/*Register*/}
               <Route exact path={c.registerPath}
@@ -146,42 +148,58 @@ export default class App extends Component {
               />
 
               {/*Create Question Sheet*/}
-              <Route exact path={c.createGlobalSheetPath + "/:id/:scope"}
-                component={CreateQuestionSheet} />
-              
+              {protectedRoute(
+                <Route exact path={c.createGlobalSheetPath + "/:id/:scope"}
+                  component={CreateQuestionSheet} />
+                , this.state.user, "User")}
+
               {/*Review Questions*/}
-              <Route exact path={c.reviewQuestionsPath}
-                component={QuestionReview} />
+              {protectedRoute(
+                <Route exact path={c.reviewQuestionsPath}
+                  component={QuestionReview} />
+                , this.state.user, "User")}
 
               {/*View Global Question*/}
               {/*I*/}<Route exact path={c.viewGlobalQuestion + "/:id/:sheetId"}
                 component={ViewGlobalQuestionWithInitialData} />
 
               {/*Create Question*/}
-              <Route exact path={c.createQuestionPath + "/:id/:scope"}
-                render={(props) => <CreateQuestion {...props} isInternal={false} />} />
+              {protectedRoute(
+                <Route exact path={c.createQuestionPath + "/:id/:scope"}
+                  render={(props) => <CreateQuestion {...props} isInternal={false} />} />
+                , this.state.user, "User")}
 
               {/*Copy Questions*/}
-              <Route exact path={c.copyQuestionsPath+"/:sheetId"} component={CopyQuestions2} />
+              {protectedRoute(
+                <Route exact path={c.copyQuestionsPath + "/:sheetId"} component={CopyQuestions2} />
+                , this.state.user, "User")}
 
               {/*Test*/}
-              <Route exact path={c.testPath + "/:id/:mode"} render={(props) =>
-                <Test
-                  {...props}
-                  returnId={this.state.personalRethurnId}
-                />
-              } />
+              {protectedRoute(
+                <Route exact path={c.testPath + "/:id/:mode"} render={(props) =>
+                  <Test
+                    {...props}
+                    returnId={this.state.personalRethurnId}
+                  />
+                } />, this.state.user, "User")}
 
               {/*Edit Question*/}
-              <Route exact path={c.editQuestionPath + "/:id/:scope/:sheetId"}
-                component={EditQuestion} />
+              {protectedRoute(
+                <Route exact path={c.editQuestionPath + "/:id/:scope/:sheetId"}
+                  component={EditQuestion} />
+                , this.state.user, "User")}
 
               {/*Edit Question Sheet*/}
-              <Route exact path={c.editQuestionSheetPath + "/:id/:scope/:sheetId"}
-                component={EditSheet} />
-              
-              <Route exact path={c.filterQuestionsPath}
-                component={FilterQuestions} />
+              {protectedRoute(
+                <Route exact path={c.editQuestionSheetPath + "/:id/:scope/:sheetId"}
+                  component={EditSheet} />
+                , this.state.user, "User")}
+
+              {/*Filter Questions*/}
+              {protectedRoute(
+                <Route exact path={c.filterQuestionsPath}
+                  component={FilterQuestions} />
+                , this.state.user, "Admin")}
 
               {/*Home*/}
               <Route exact path="/"
